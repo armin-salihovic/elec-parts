@@ -3,14 +3,56 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Part;
 use App\Models\PartCategory;
-use App\Models\PartSource;
 use App\Models\PedalType;
+use App\Models\Source;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class DatabaseSeeder extends Seeder
 {
+
+    public static function addSourceToCategories(&$categories, $source_id)
+    {
+        foreach ($categories as &$value) {
+            if (array_key_exists("children", $value)) {
+                self::addSourceToCategories($value["children"], $source_id);
+            }
+            $value["source_id"] = 1;
+        }
+    }
+
+    public static function findCategoryIDinTree($nodes, $category, $depth = 0, &$index = null)
+    {
+        foreach ($nodes as $node) {
+            if ($node->name == $category[$depth]) {
+                if (count($category) == $depth + 1) {
+                    $index = $node->id;
+                }
+                self::findCategoryIDinTree($node->children, $category, $depth + 1, $index);
+            }
+        }
+
+        if ($index != null) {
+            return $index;
+        }
+
+        throw new \Exception("ERROR with finding the node");
+    }
+
+    public static function getCategoryID($category)
+    {
+        $partCategory = PartCategory::where('name', $category[count($category) - 1])->get();
+        if ($partCategory->count() == 1) {
+            return $partCategory[0]->id;
+        }
+
+        $nodes = PartCategory::whereIsRoot()->get();
+        return DatabaseSeeder::findCategoryIDinTree($nodes, $category);
+    }
+
     /**
      * Seed the application's database.
      *
@@ -27,21 +69,23 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $pedalTypes = [
+            'Fuzz',
             'Distortion',
             'Delay',
             'Modulation',
             'Other'
         ];
 
-        $partCategories = [
-            'Resistors',
-            'Capacitors',
-            'Transistors',
-            'LED',
-            'Diodes',
-            'Enclosures',
-            'Knobs',
-        ];
+        $json_string = Storage::disk('local')->get('categories.json');
+
+        if ($json_string === null) {
+            dd("ERROR: JSON is not read.");
+        }
+
+        $json = json_decode($json_string, true);
+        if ($json === null) {
+            dd("ERROR: Json decoding has failed.");
+        }
 
         $partSources = [
             'Tayda',
@@ -57,14 +101,30 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        foreach ($partCategories as $name) {
-            PartCategory::create([
+        foreach ($partSources as $name) {
+            Source::create([
                 'name' => $name
             ]);
         }
-        foreach ($partSources as $name) {
-            PartSource::create([
-                'name' => $name
+
+        DatabaseSeeder::addSourceToCategories($json, 1);
+
+        foreach ($json as $value) {
+            PartCategory::create($value);
+        }
+
+        $json_string = Storage::disk('local')->get('products_cleaned.json');
+
+        $json = json_decode($json_string, true);
+
+        foreach ($json as $value) {
+            Part::create([
+                'name' => $value['name'],
+                'sku' => $value['sku'],
+                'price' => $value['price'],
+                'url' => $value['url'],
+                'part_category_id' => DatabaseSeeder::getCategoryID($value['category']),
+                'source_id' => 1
             ]);
         }
 

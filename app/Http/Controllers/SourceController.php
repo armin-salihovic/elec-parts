@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\PartSource;
+use App\Models\Source;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 
-class PartSourceController extends Controller
+class SourceController extends Controller
 {
     public function index()
     {
         return Inertia::render('PartSources/Index', [
-            'part_sources' => PartSource::all()->map(function ($partSource) {
+            'part_sources' => Source::all()->map(function ($partSource) {
                 return [
                     'id' => $partSource->id,
                     'name' => $partSource->name,
@@ -28,7 +28,7 @@ class PartSourceController extends Controller
 
     public function store()
     {
-        PartSource::create(
+        Source::create(
             Request::validate([
                 'name' => ['required', 'max:50'],
             ])
@@ -36,7 +36,7 @@ class PartSourceController extends Controller
         return Redirect::route('pedal-types.index');
     }
 
-    public function update(PartSource $partSource)
+    public function update(Source $partSource)
     {
         $partSource->update(
             Request::validate([

@@ -16,9 +16,11 @@ return new class extends Migration
         Schema::create('parts', function (Blueprint $table) {
             $table->id();
             $table->string("name");
-            $table->foreignId("part_category_id");
-            $table->integer("quantity");
-            $table->foreignId("part_source_id")->constrained();
+            $table->string("sku");
+            $table->decimal("price");
+            $table->string("url");
+            $table->foreignId("part_category_id")->constrained();
+            $table->foreignId("source_id")->constrained();
             $table->timestamps();
         });
     }
