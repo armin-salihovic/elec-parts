@@ -36,6 +36,7 @@ Route::get('/dashboard', function () {
 Route::resource('pedal-types', PedalTypeController::class);
 Route::resource('part-categories', PartCategoryController::class);
 Route::resource('parts', PartController::class);
+Route::get('sku-part', [PartController::class, 'findBySKU'])->name('sku-part');
 Route::resource('part-sources', SourceController::class);
 Route::resource('part-inventories', PartInventoryController::class);
 

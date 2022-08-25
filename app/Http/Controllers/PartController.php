@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\PartResource;
 use App\Models\Part;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
@@ -43,5 +44,25 @@ class PartController extends Controller
                 'name' => ['required', 'max:50'],
             ])
         );
+    }
+
+    public function show(Part $part)
+    {
+
+    }
+
+    public function findBySKU(Request $request)
+    {
+        if($sku = $request->input('sku')) {
+            $part = Part::where('sku', $sku)->first();
+
+            if($part === null) {
+                return response()->json(['message' => "SKU <".$sku."> was not found."], 400);
+            }
+
+            return new PartResource($part);
+        }
+
+        return response()->json('Missing the SKU parameter.', 400);
     }
 }
