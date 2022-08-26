@@ -3,7 +3,7 @@ import BreezeAuthenticatedLayout from '@/Layouts/Authenticated.vue';
 import { Head } from '@inertiajs/inertia-vue3';
 import Button from "@/Components/Button.vue";
 import { Inertia } from '@inertiajs/inertia'
-import {reactive, ref} from "vue";
+import {provide, reactive, ref} from "vue";
 import BreezeButton from '@/Components/Button.vue';
 import BreezeInput from '@/Components/Input.vue';
 import BreezeLabel from '@/Components/Label.vue';
@@ -16,9 +16,10 @@ import axios from "axios"; // Optional theme CSS
 
 
 const parts = ref([]);
+provide('addItem', addItem);
 
 const form = ref({
-    name: '',
+    sku: '',
     quantity: 1,
 });
 
@@ -72,20 +73,26 @@ const props = defineProps({
     part: Object,
 })
 
-const addItemBySku = async () => {
-    const index = parts.value.findIndex((x) => x.sku === form.value.name);
+async function addItem(part) {
+    const index = parts.value.findIndex((x) => x.sku === part.sku);
 
     if (index === -1) {
-        await fetchProductBySku();
+        if (part.name === undefined) {
+            await fetchProductBySku();
+        } else {
+            part.quantity = Number(part.quantity);
+            parts.value.push(part);
+        }
     } else {
-        parts.value[index].quantity += Number(form.value.quantity);
+        parts.value[index].quantity += Number(part.quantity);
     }
 
     gridApi.value.setRowData(parts.value);
+
 }
 
 const fetchProductBySku = async () => {
-    return await axios.get(`${route('sku-part')}?sku=${form.value.name}`).then(({data}) => {
+    return await axios.get(`${route('sku-part')}?sku=${form.value.sku}`).then(({data}) => {
         const part = data.data;
 
         part.quantity = Number(form.value.quantity);
@@ -124,15 +131,15 @@ function isPositiveNumber(str) {
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 bg-white border-b border-gray-200">
-                        <form @submit.prevent="addItemBySku">
+                        <form @submit.prevent="addItem(form)">
                             <div class="flex items-center gap-2">
                                 <div>
                                     <BreezeLabel for="name" value="Name" />
-                                    <BreezeInput id="name" type="text" class="mt-1 block" v-model="form.name" required autofocus />
+                                    <BreezeInput id="name" type="text" class="mt-1 block" v-model="form.sku" required autofocus />
                                 </div>
                                 <div>
                                     <BreezeLabel for="quantity" value="Quantity" />
-                                    <BreezeInput id="quantity" type="number" class="mt-1 block" v-model="form.quantity" required autofocus />
+                                    <BreezeInput id="quantity" type="number" class="mt-1 block" v-model="form.quantity" required/>
                                 </div>
                                 <div class="flex items-center justify-start">
                                     <BreezeButton>

@@ -39,6 +39,7 @@ Route::resource('parts', PartController::class);
 Route::get('sku-part', [PartController::class, 'findBySKU'])->name('sku-part');
 Route::resource('part-sources', SourceController::class);
 Route::resource('part-inventories', PartInventoryController::class);
+Route::post('tayda-pdf-to-products', [PartController::class, 'pdfToProducts'])->name('tayda-pdf-to-products');
 
 
 require __DIR__.'/auth.php';
