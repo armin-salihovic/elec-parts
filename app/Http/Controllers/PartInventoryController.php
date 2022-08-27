@@ -28,7 +28,10 @@ class PartInventoryController extends Controller
             'data' => PartInventory::all()->map(function ($partInventory) {
                 return [
                     'id' => $partInventory->id,
-                    'name' => $partInventory->name,
+                    'name' => $partInventory->part->name,
+                    'sku' => $partInventory->part->sku,
+                    'quantity' => $partInventory->quantity,
+                    'source' => $partInventory->part->source->name,
                 ];
             }),
         ]);

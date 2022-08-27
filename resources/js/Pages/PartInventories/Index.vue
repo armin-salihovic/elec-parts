@@ -26,6 +26,15 @@ const columnDefs = reactive({
             field: "name",
             editable: true
         },
+        {
+            field: "sku",
+        },
+        {
+            field: "quantity",
+        },
+        {
+            field: "source",
+        },
     ],
 });
 
@@ -76,6 +85,7 @@ onMounted(()=>{
                             animateRows="true"
                             @grid-ready="onGridReady"
                             @cell-value-changed="updateRow"
+                            pagination="true"
                         >
                         </ag-grid-vue>
                 </div>

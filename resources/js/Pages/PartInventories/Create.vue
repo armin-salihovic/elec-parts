@@ -43,6 +43,7 @@ const columnDefs = reactive({
         { field: "sku" },
         { field: "category" },
         {
+            field: "quantity",
             valueGetter: params => {
                 return params.data.quantity;
             },
@@ -141,7 +142,7 @@ function isPositiveNumber(str) {
                                     <BreezeLabel for="quantity" value="Quantity" />
                                     <BreezeInput id="quantity" type="number" class="mt-1 block" v-model="form.quantity" required/>
                                 </div>
-                                <div class="flex items-center justify-start">
+                                <div class="flex items-center justify-start mt-6">
                                     <BreezeButton>
                                         Add
                                     </BreezeButton>
