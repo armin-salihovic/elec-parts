@@ -106,7 +106,7 @@ const editingRows= ref([]);
     text-overflow: ellipsis;
 }
 
-::v-deep(.editable-cells-table td.p-cell-editing) {
+::v-deep(td.p-editable-column.p-cell-editing) {
     padding-top: 0;
     padding-bottom: 0;
 }
