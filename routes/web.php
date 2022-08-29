@@ -3,8 +3,8 @@
 use App\Http\Controllers\PartCategoryController;
 use App\Http\Controllers\PartController;
 use App\Http\Controllers\PartInventoryController;
-use App\Http\Controllers\SourceController;
 use App\Http\Controllers\PedalTypeController;
+use App\Http\Controllers\SourceController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -33,13 +33,14 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::resource('pedal-types', PedalTypeController::class);
-Route::resource('part-categories', PartCategoryController::class);
-Route::resource('parts', PartController::class);
-Route::get('sku-part', [PartController::class, 'findBySKU'])->name('sku-part');
-Route::resource('part-sources', SourceController::class);
-Route::resource('part-inventories', PartInventoryController::class);
-Route::post('tayda-pdf-to-products', [PartController::class, 'pdfToProducts'])->name('tayda-pdf-to-products');
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::resource('pedal-types', PedalTypeController::class);
+    Route::resource('part-categories', PartCategoryController::class);
+    Route::resource('parts', PartController::class);
+    Route::get('sku-part', [PartController::class, 'findBySKU'])->name('sku-part');
+    Route::resource('part-sources', SourceController::class);
+    Route::resource('part-inventories', PartInventoryController::class);
+    Route::post('tayda-pdf-to-products', [PartController::class, 'pdfToProducts'])->name('tayda-pdf-to-products');
+});
 
-
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
