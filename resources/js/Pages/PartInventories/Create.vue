@@ -15,7 +15,7 @@ const handleFileUpload = async() => {
     // debugger;
     console.log("selected file",file.value.files)
 
-    Inertia.post(route('part-inventories.store'), file.value.files, {
+    Inertia.post(route('part-inventories.store'), {file: file.value.files}, {
         forceFormData: true,
     })
 
