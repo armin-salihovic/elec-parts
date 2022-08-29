@@ -4,7 +4,7 @@ import { Head } from '@inertiajs/inertia-vue3';
 import Button from "@/Components/Button.vue";
 import { Inertia } from '@inertiajs/inertia'
 
-import { onMounted, ref } from "vue";
+import {onMounted, ref} from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import Paginator from "primevue/paginator";
@@ -101,7 +101,7 @@ function loadLazyData() {
         </template>
 
         <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <DataTable
                         :value="data.data"
@@ -172,15 +172,22 @@ function loadLazyData() {
 </template>
 
 <style scoped>
-::v-deep(.p-datatable-table) {
-    table-layout: fixed !important;
-    width: 1000px !important;
-}
+/*::v-deep(.p-datatable-table) {*/
+/*    table-layout: fixed !important;*/
+/*    width: 1000px !important;*/
+/*}*/
 
 ::v-deep(.p-datatable-tbody td) {
     white-space: nowrap;
     overflow: hidden !important;
     text-overflow: ellipsis;
+}
+
+@media (max-width: 960px) {
+    ::v-deep(.p-datatable-table) {
+        table-layout: auto !important;
+        width: auto !important;
+    }
 }
 
 ::v-deep(td.p-editable-column.p-cell-editing) {
