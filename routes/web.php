@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\PartCategoryController;
+use App\Http\Controllers\PartController;
+use App\Http\Controllers\PartSourceController;
 use App\Http\Controllers\PedalTypeController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -30,5 +33,9 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::resource('pedal-types', PedalTypeController::class);
+Route::resource('part-categories', PartCategoryController::class);
+Route::resource('parts', PartController::class);
+Route::resource('part-sources', PartSourceController::class);
+
 
 require __DIR__.'/auth.php';

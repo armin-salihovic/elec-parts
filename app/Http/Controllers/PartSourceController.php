@@ -2,20 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\PartCategory;
+use App\Models\PartSource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 
-class PartCategoryController extends Controller
+class PartSourceController extends Controller
 {
     public function index()
     {
-        return Inertia::render('PartCategories/Index', [
-            'pedal_types' => PartCategory::all()->map(function ($partCategory) {
+        return Inertia::render('PartSources/Index', [
+            'part_sources' => PartSource::all()->map(function ($partSource) {
                 return [
-                    'id' => $partCategory->id,
-                    'name' => $partCategory->name,
+                    'id' => $partSource->id,
+                    'name' => $partSource->name,
                 ];
             }),
         ]);
@@ -23,22 +23,22 @@ class PartCategoryController extends Controller
 
     public function create()
     {
-        return Inertia::render('PartCategories/Create');
+        return Inertia::render('PartSources/Create');
     }
 
     public function store()
     {
-        PartCategory::create(
+        PartSource::create(
             Request::validate([
                 'name' => ['required', 'max:50'],
             ])
         );
-        return Redirect::route('part-categories.index');
+        return Redirect::route('pedal-types.index');
     }
 
-    public function update(PartCategory $partCategory)
+    public function update(PartSource $partSource)
     {
-        $partCategory->update(
+        $partSource->update(
             Request::validate([
                 'name' => ['required', 'max:50'],
             ])

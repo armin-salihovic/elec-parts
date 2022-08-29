@@ -13,12 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('parts', function (Blueprint $table) {
+        Schema::create('part_sources', function (Blueprint $table) {
             $table->id();
             $table->string("name");
-            $table->foreignId("part_category_id");
-            $table->integer("quantity");
-            $table->foreignId("part_source_id")->constrained();
             $table->timestamps();
         });
     }
@@ -30,6 +27,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('parts');
+        Schema::dropIfExists('part_sources');
     }
 };
