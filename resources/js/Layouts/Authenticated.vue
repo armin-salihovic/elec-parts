@@ -120,3 +120,10 @@ const showingNavigationDropdown = ref(false);
         </div>
     </div>
 </template>
+
+<style>
+.p-component {
+    font-size: 13px;
+    font-family: "Roboto", sans-serif;
+}
+</style>
