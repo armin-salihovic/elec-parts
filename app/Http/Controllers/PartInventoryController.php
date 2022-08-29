@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\DocumentType;
 use App\Models\Part;
 use App\Models\PartInventory;
+use App\Models\Source;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class PartInventoryController extends Controller
 {
@@ -24,18 +25,31 @@ class PartInventoryController extends Controller
 
     public function index()
     {
-        $partInventories = PartInventory::paginate(10)->through(function ($partInventory) {
+
+        $partInventories = QueryBuilder::for(PartInventory::class)
+            ->allowedFilters(['part.name', 'quantity', 'part.sku', 'part.source.name'])
+            ->allowedSorts('quantity')
+            ->paginate(10)
+            ->appends(request()->query())
+            ->through(function ($partInventory) {
+                return [
+                    'id' => $partInventory->id,
+                    'part.name' => $partInventory->part->name,
+                    'part.sku' => $partInventory->part->sku,
+                    'quantity' => $partInventory->quantity,
+                    'part.source.name' => $partInventory->part->source->name,
+                ];
+            });
+
+        $sources = Source::all()->map(function ($source) {
             return [
-                'id' => $partInventory->id,
-                'name' => $partInventory->part->name,
-                'sku' => $partInventory->part->sku,
-                'quantity' => $partInventory->quantity,
-                'source' => $partInventory->part->source->name,
+                'name' => $source->name,
             ];
         });
 
         return Inertia::render('PartInventories/Index', [
             'data' => $partInventories,
+            'sources' => $sources,
         ]);
     }
 
@@ -44,15 +58,16 @@ class PartInventoryController extends Controller
         return Inertia::render('PartInventories/Create');
     }
 
-    public static function processDocument($page) {
+    public static function processDocument($page)
+    {
         $array = [];
         for ($i = 0; $i < count($page); $i++) {
-            if($page[$i][0] == '$' && $page[$i+1][0] == '$') {
+            if ($page[$i][0] == '$' && $page[$i + 1][0] == '$') {
                 $item = [];
-                $item['sku'] = $page[$i-2];
-                $item['quantity'] = $page[$i-1];
+                $item['sku'] = $page[$i - 2];
+                $item['quantity'] = $page[$i - 1];
                 $item['price'] = $page[$i];
-                $item['total'] = $page[$i+1];
+                $item['total'] = $page[$i + 1];
                 $array[] = $item;
                 $i += 2;
             }
@@ -77,10 +92,10 @@ class PartInventoryController extends Controller
 
             foreach ($products as $product) {
                 $part = Part::where('sku', $product['sku'])->first();
-                if($part === null) {
+                if ($part === null) {
                     $part = PartInventoryController::fixSkuError($documentArray, $product);
 
-                    if($part === null) {
+                    if ($part === null) {
                         $failed[]['product'] = $product;
                         continue;
                     }
@@ -90,10 +105,10 @@ class PartInventoryController extends Controller
                     'quantity' => $product['quantity'],
                 ]);
             }
-            if(count($failed) > 0) {
-                dump("Failed products: ".count($failed));
+            if (count($failed) > 0) {
+                dump("Failed products: " . count($failed));
                 dump($failed);
-            } else if(count($products) === 0) {
+            } else if (count($products) === 0) {
                 dd("failed");
             }
             dd("success");
