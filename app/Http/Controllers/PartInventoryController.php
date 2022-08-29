@@ -24,16 +24,18 @@ class PartInventoryController extends Controller
 
     public function index()
     {
+        $partInventories = PartInventory::paginate(10)->through(function ($partInventory) {
+            return [
+                'id' => $partInventory->id,
+                'name' => $partInventory->part->name,
+                'sku' => $partInventory->part->sku,
+                'quantity' => $partInventory->quantity,
+                'source' => $partInventory->part->source->name,
+            ];
+        });
+
         return Inertia::render('PartInventories/Index', [
-            'data' => PartInventory::all()->map(function ($partInventory) {
-                return [
-                    'id' => $partInventory->id,
-                    'name' => $partInventory->part->name,
-                    'sku' => $partInventory->part->sku,
-                    'quantity' => $partInventory->quantity,
-                    'source' => $partInventory->part->source->name,
-                ];
-            }),
+            'data' => $partInventories,
         ]);
     }
 
@@ -105,12 +107,13 @@ class PartInventoryController extends Controller
         return Redirect::route('part-inventories.index');
     }
 
-    public function update(PartInventory $partInventory)
+    public function update(PartInventory $partInventory, Request $request)
     {
-        $partInventory->update(
-            Request::validate([
-                'name' => ['required', 'max:50'],
-            ])
-        );
+        $request->validate([
+            'quantity' => ['required', 'max:50'],
+        ]);
+
+        $partInventory->quantity = $request->quantity;
+        $partInventory->save();
     }
 }
