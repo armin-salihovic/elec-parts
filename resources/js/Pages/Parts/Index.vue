@@ -4,50 +4,86 @@ import { Head } from '@inertiajs/inertia-vue3';
 import Button from "@/Components/Button.vue";
 import { Inertia } from '@inertiajs/inertia'
 
-import { AgGridVue } from "ag-grid-vue3";  // the AG Grid Vue Component
-import { reactive, onMounted, ref } from "vue";
+import { onMounted, ref } from "vue";
+import DataTable from "primevue/datatable";
+import Column from "primevue/column";
+import Paginator from "primevue/paginator";
+import InputText from "primevue/inputtext";
+import MultiSelect from "primevue/multiselect";
+import {FilterMatchMode, FilterOperator} from "primevue/api";
+import {buildQueryUrl} from "@/primevue-datatable-params-builder";
+import CrudButton from "@/Components/CrudButton.vue";
 
-import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
-import "ag-grid-community/styles/ag-theme-material.css"; // Optional theme CSS
-
-const gridApi = ref(null); // Optional - for accessing Grid's API
-
-// Obtain API from grid's onGridReady event
-const onGridReady = (params) => {
-    gridApi.value = params.api;
-};
-
-const rowData = reactive({}); // Set rowData to Array of Objects, one Object per Row
-
-// Each Column Definition results in one Column.
-const columnDefs = reactive({
-    value: [
-        { field: "name" },
-        { field: "category" },
-        { field: "quantity" },
-        { field: "source" },
-    ],
-});
-
-// DefaultColDef sets props common to all Columns
-const defaultColDef = {
-    sortable: true,
-    filter: true,
-    flex: 1
-};
+const loading = ref(false);
 
 const props = defineProps({
-    pedal_types: Object,
+    data: Object,
+    sources: Object,
     create_url: String,
 })
 
-const updateRow = (event) => {
-    Inertia.put(route('parts.update', event.data.id), event.data);
-}
+const editingRows= ref([]);
+
+const filters = ref({
+    'global': { value: null, matchMode: FilterMatchMode.CONTAINS},
+    'name': { operator: FilterOperator.AND, constraints: [{value: null, matchMode: FilterMatchMode.CONTAINS}]},
+    'sku': { operator: FilterOperator.AND, constraints: [{value: null, matchMode: FilterMatchMode.EQUALS}]},
+    'source.name': { value: null, matchMode: FilterMatchMode.IN},
+});
+
+const lazyParams = ref({});
 
 onMounted(()=>{
-    console.log(props.pedal_types)
+    lazyParams.value = {
+        page: 0,
+        sortField: null,
+        sortOrder: null,
+        filters: filters.value
+    };
 })
+
+function onRowEditSave(event) {
+    let { newData, data } = event;
+
+    if(Number(newData.quantity) === Number(data.quantity)) return;
+
+    Inertia.put(route('parts.update', newData.id), newData, {
+        replace: false,
+        preserveState: true,
+        preserveScroll: true,
+    });
+}
+
+// datatable events
+
+function onFilter() {
+    lazyParams.value.filters = filters.value;
+    loadLazyData();
+}
+
+function onSort(event) {
+    lazyParams.value.sortField = event.sortField;
+    lazyParams.value.sortOrder = event.sortOrder;
+    loadLazyData();
+}
+
+function onPage (event) {
+    lazyParams.value.page = event.page;
+    loadLazyData();
+}
+
+// data is lazy loaded whenever a datatable related event fires
+
+function loadLazyData() {
+    const url = buildQueryUrl(lazyParams.value, route('parts.index'));
+    Inertia.visit(url, {
+        preserveState: true,
+        preserveScroll: true,
+        onStart: () => { loading.value = true; },
+        onSuccess: () => { loading.value = false },
+    })
+}
+
 </script>
 
 <template>
@@ -66,20 +102,85 @@ onMounted(()=>{
         <div class="py-12">
             <div class="mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                        <ag-grid-vue
-                            class="ag-theme-material"
-                            style="height: 500px"
-                            :columnDefs="columnDefs.value"
-                            :rowData="pedal_types"
-                            :defaultColDef="defaultColDef"
-                            rowSelection="multiple"
-                            animateRows="true"
-                            @grid-ready="onGridReady"
-                            @cell-value-changed="updateRow"
-                        >
-                        </ag-grid-vue>
+                    <DataTable
+                        :value="data.data"
+                        :autoLayout="true"
+                        :resizableColumns="true"
+                        tableStyle="width:auto"
+                        :lazy="true"
+                        :loading="loading"
+                        filterDisplay="menu"
+                        v-model:filters="filters"
+                        editMode="row"
+                        @row-edit-save="onRowEditSave"
+                        dataKey="id"
+                        v-model:editingRows="editingRows"
+                        @filter="onFilter"
+                        @sort="onSort($event)"
+                    >
+                        <Column field="name" header="Name" :showFilterOperator="false" :max-constraints="1">
+                            <template #body="{data}">
+                                {{data["name"]}}
+                            </template>
+                            <template #filter="{filterModel}">
+                                <InputText type="text" v-model="filterModel.value" class="p-column-filter" placeholder="Search by name"/>
+                            </template>
+                        </Column>
+                        <Column field="sku" header="SKU" :showFilterOperator="false" :max-constraints="1">
+                            <template #body="{data}">
+                                {{data["sku"]}}
+                            </template>
+                            <template #filter="{filterModel}">
+                                <InputText type="text" v-model="filterModel.value" class="p-column-filter" placeholder="Search by SKU"/>
+                            </template>
+                        </Column>
+                        <Column header="Distributor" filterField="source.name" :showFilterMatchModes="false" :filterMenuStyle="{'width':'14rem'}" style="min-width:14rem" :showFilterOperator="false" :max-constraints="1">
+                            <template #body="{data}">
+                                <span class="image-text">{{data["source.name"]}}</span>
+                            </template>
+                            <template #filter="{filterModel}">
+                                <div class="mb-3 font-bold">Distributors</div>
+                                <MultiSelect v-model="filterModel.value" :options="sources" optionLabel="name" placeholder="Any" class="p-column-filter">
+                                    <template #option="slotProps">
+                                        <div class="p-multiselect-representative-option">
+                                            <span class="image-text">{{slotProps.option.name}}</span>
+                                        </div>
+                                    </template>
+                                </MultiSelect>
+                            </template>
+                        </Column>
+                        <Column :rowEditor="true" style="" bodyStyle="text-align:center; padding: 0"></Column>
+                        <Column headerStyle="width: 4rem; text-align: center" bodyStyle="text-align: center; overflow: visible; padding: 0">
+                            <template #body="{data}">
+                                <CrudButton type="link" :url="data['url']" />
+                            </template>
+                        </Column>
+                    </DataTable>
+
+                    <Paginator :first="data.from" :rows="data.per_page" :totalRecords="data.total" @page="onPage($event)"/>
                 </div>
             </div>
         </div>
+
     </BreezeAuthenticatedLayout>
 </template>
+
+<style scoped>
+::v-deep(.p-datatable-tbody td) {
+    white-space: nowrap;
+    overflow: hidden !important;
+    text-overflow: ellipsis;
+}
+
+@media (max-width: 960px) {
+    ::v-deep(.p-datatable-table) {
+        table-layout: auto !important;
+        width: auto !important;
+    }
+}
+
+::v-deep(td.p-editable-column.p-cell-editing) {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+</style>

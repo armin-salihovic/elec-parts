@@ -5,21 +5,39 @@ namespace App\Http\Controllers;
 use App\Http\Resources\PartResource;
 use App\Http\Resources\PartWithQuantityResource;
 use App\Models\Part;
+use App\Models\Source;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class PartController extends Controller
 {
     public function index()
     {
-        return Inertia::render('Parts/Index', [
-            'pedal_types' => Part::all()->map(function ($part) {
+        $parts = QueryBuilder::for(Part::class)
+            ->allowedFilters(['name', 'sku', 'source.name'])
+            ->paginate(10)
+            ->appends(request()->query())
+            ->through(function ($part) {
                 return [
                     'id' => $part->id,
                     'name' => $part->name,
+                    'sku' => $part->sku,
+                    'url' => $part->url,
+                    'source.name' => $part->source->name,
                 ];
-            }),
+            });
+
+        $sources = Source::all()->map(function ($source) {
+            return [
+                'name' => $source->name,
+            ];
+        });
+
+        return Inertia::render('Parts/Index', [
+            'data' => $parts,
+            'sources' => $sources,
         ]);
     }
 
