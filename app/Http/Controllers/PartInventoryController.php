@@ -2,32 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Part;
 use App\Models\PartInventory;
 use App\Models\Source;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
+use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class PartInventoryController extends Controller
 {
-    private static function fixSkuError(array $document, mixed $product)
-    {
-        for ($i = 0; $i < count($document); $i++) {
-            if ($document[$i] == $product['sku']) {
-                $product['sku'] = $document[$i - 1] . $product['sku'];
-                break;
-            }
-        }
-        return Part::where('sku', $product['sku'])->first();
-    }
-
     public function index()
     {
 
         $partInventories = QueryBuilder::for(PartInventory::class)
-            ->allowedFilters(['part.name', 'quantity', 'part.sku', 'part.source.name'])
+            ->allowedFilters(['part.name', 'part.sku', 'part.source.name', AllowedFilter::exact('quantity')])
             ->allowedSorts('quantity')
             ->paginate(10)
             ->appends(request()->query())
@@ -58,67 +47,22 @@ class PartInventoryController extends Controller
         return Inertia::render('PartInventories/Create');
     }
 
-    public static function processDocument($page)
-    {
-        $array = [];
-        for ($i = 0; $i < count($page); $i++) {
-            if ($page[$i][0] == '$' && $page[$i + 1][0] == '$') {
-                $item = [];
-                $item['sku'] = $page[$i - 2];
-                $item['quantity'] = $page[$i - 1];
-                $item['price'] = $page[$i];
-                $item['total'] = $page[$i + 1];
-                $array[] = $item;
-                $i += 2;
-            }
-        }
-        return $array;
-    }
-
     public function store(Request $request)
     {
-        if ($request->hasFile('file')) {
-            // Parse PDF file and build necessary objects.
-            $parser = new \Smalot\PdfParser\Parser();
-            $pdf = $parser->parseFile($request->file[0]);
+        // TODO: validate the request so we make sure that ID and quantity are there.
 
-            $text = $pdf->getText();
-            $text = trim(preg_replace('/\s+/', ' ', $text));
-            $documentArray = explode(' ', $text);
-
-            $products = PartInventoryController::processDocument($documentArray);
-
-            $failed = [];
-
-            foreach ($products as $product) {
-                $part = Part::where('sku', $product['sku'])->first();
-                if ($part === null) {
-                    $part = PartInventoryController::fixSkuError($documentArray, $product);
-
-                    if ($part === null) {
-                        $failed[]['product'] = $product;
-                        continue;
-                    }
-                }
+        foreach ($request['parts'] as $partInventory) {
+            if($part = PartInventory::where('part_id', $partInventory['id'])->first()) {
+                $part->quantity += $partInventory['quantity'];
+                $part->save();
+            } else {
                 PartInventory::create([
-                    'part_id' => $part->id,
-                    'quantity' => $product['quantity'],
+                    'part_id' => $partInventory['id'],
+                    'quantity' => $partInventory['quantity'],
                 ]);
             }
-            if (count($failed) > 0) {
-                dump("Failed products: " . count($failed));
-                dump($failed);
-            } else if (count($products) === 0) {
-                dd("failed");
-            }
-            dd("success");
         }
 
-        PartInventory::create(
-            Request::validate([
-                'name' => ['required', 'max:50'],
-            ])
-        );
         return Redirect::route('part-inventories.index');
     }
 

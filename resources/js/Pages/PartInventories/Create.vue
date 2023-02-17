@@ -8,12 +8,12 @@ import BreezeButton from '@/Components/Button.vue';
 import BreezeInput from '@/Components/Input.vue';
 import BreezeLabel from '@/Components/Label.vue';
 import ADropdown from "@/Components/ADropdown.vue";
+import CircleButtonCellRenderer from "@/Components/CircleButtonCellRenderer.vue";
 
 import { AgGridVue } from "ag-grid-vue3";  // the AG Grid Vue Component
 import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
-import "ag-grid-community/styles/ag-theme-material.css";
-import axios from "axios"; // Optional theme CSS
-
+import "ag-grid-community/styles/ag-theme-material.css"; // Optional theme CSS
+import axios from "axios";
 
 const parts = ref([]);
 provide('addItem', addItem);
@@ -23,8 +23,8 @@ const form = ref({
     quantity: 1,
 });
 
-const submit = () => {
-    Inertia.post(route('part-inventories.store'), form.value);
+const handleSubmit = () => {
+    Inertia.post(route('part-inventories.store'), {parts: parts.value});
 }
 
 const gridApi = ref(null); // Optional - for accessing Grid's API
@@ -58,6 +58,15 @@ const columnDefs = reactive({
             editable: true,
         },
         { field: "source" },
+        {
+            field: "Delete",
+            cellRenderer: CircleButtonCellRenderer,
+            cellRendererParams: {
+                clicked: function(field) {
+                    deleteItem(field.data.id);
+                }
+            }
+        },
     ],
 });
 
@@ -92,6 +101,10 @@ async function addItem(part) {
 
 }
 
+function deleteItem(id) {
+    parts.value = parts.value.filter((part) => { return part.id !== id });
+}
+
 const fetchProductBySku = async () => {
     return await axios.get(`${route('sku-part')}?sku=${form.value.sku}`).then(({data}) => {
         const part = data.data;
@@ -112,7 +125,6 @@ function isPositiveNumber(str) {
     return n !== Infinity && String(n) === str && n >= 0;
 }
 
-
 </script>
 
 <template>
@@ -132,7 +144,7 @@ function isPositiveNumber(str) {
             <div class="mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 bg-white border-b border-gray-200">
-                        <form @submit.prevent="addItem(form)">
+                        <form @submit.prevent>
                             <div class="flex items-center gap-2">
                                 <div>
                                     <BreezeLabel for="name" value="Name" />
@@ -143,16 +155,17 @@ function isPositiveNumber(str) {
                                     <BreezeInput id="quantity" type="number" class="mt-1 block" v-model="form.quantity" required/>
                                 </div>
                                 <div class="flex items-center justify-start mt-6">
-                                    <BreezeButton>
+                                    <BreezeButton @click="addItem(form)">
                                         Add
                                     </BreezeButton>
                                 </div>
                                 <div class="ml-auto">
                                     <ADropdown />
+                                    <BreezeButton @click="handleSubmit" class="ml-5" :disabled="!parts.length">
+                                        Save
+                                    </BreezeButton>
                                 </div>
                             </div>
-
-
                         </form>
 
                         <ag-grid-vue
