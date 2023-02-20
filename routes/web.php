@@ -3,10 +3,8 @@
 use App\Http\Controllers\PartCategoryController;
 use App\Http\Controllers\PartController;
 use App\Http\Controllers\PartInventoryController;
-use App\Http\Controllers\PedalTypeController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectPartController;
-use App\Http\Controllers\SourceController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -36,13 +34,11 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::resource('pedal-types', PedalTypeController::class);
     Route::resource('part-categories', PartCategoryController::class);
     Route::resource('parts', PartController::class);
     Route::resource('projects', ProjectController::class);
     Route::put('projects/{project}/description',  [ProjectController::class, 'updateDescription'])->name('projects-description.update');
     Route::get('sku-part', [PartController::class, 'findBySKU'])->name('sku-part');
-    Route::resource('part-sources', SourceController::class);
     Route::resource('part-inventories', PartInventoryController::class);
     Route::post('tayda-pdf-to-products', [PartController::class, 'pdfToProducts'])->name('tayda-pdf-to-products');
     Route::get('projects/{project}/bom', [ProjectPartController::class, 'index'])->name('project-parts.index');

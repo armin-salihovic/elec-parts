@@ -68,14 +68,6 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make("123")
         ]);
 
-        $pedalTypes = [
-            'Fuzz',
-            'Distortion',
-            'Delay',
-            'Modulation',
-            'Other'
-        ];
-
         $json_string = Storage::disk('local')->get('categories.json');
 
         if ($json_string === null) {
@@ -94,12 +86,6 @@ class DatabaseSeeder extends Seeder
             'Farnell',
             'Other',
         ];
-
-        foreach ($pedalTypes as $name) {
-            PedalType::create([
-                'name' => $name
-            ]);
-        }
 
         foreach ($partSources as $name) {
             Source::create([
