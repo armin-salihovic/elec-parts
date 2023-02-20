@@ -1,8 +1,7 @@
 <script setup>
 import BreezeAuthenticatedLayout from '@/Layouts/Authenticated.vue';
-import { Head } from '@inertiajs/inertia-vue3';
+import { Head, router } from '@inertiajs/vue3';
 import Button from "@/Components/Button.vue";
-import { Inertia } from '@inertiajs/inertia'
 import {ref} from "vue";
 import BreezeButton from '@/Components/Button.vue';
 import BreezeInput from '@/Components/Input.vue';
@@ -13,7 +12,7 @@ const form = ref({
 });
 
 const submit = () => {
-    Inertia.post(route('projects.store'), form.value);
+    router.post(route('projects.store'), form.value);
 };
 
 </script>
@@ -27,7 +26,7 @@ const submit = () => {
                 <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                     Projects
                 </h2>
-                <Button @click="Inertia.visit(route('projects.index'))">Back</Button>
+                <Button @click="router.visit(route('projects.index'))">Back</Button>
             </div>
         </template>
 

@@ -1,8 +1,7 @@
 <script setup>
 import BreezeAuthenticatedLayout from '@/Layouts/Authenticated.vue';
-import { Head } from '@inertiajs/inertia-vue3';
+import { Head, router } from '@inertiajs/vue3';
 import Button from "@/Components/Button.vue";
-import { Inertia } from '@inertiajs/inertia'
 import {provide, reactive, ref} from "vue";
 import BreezeButton from '@/Components/Button.vue';
 import BreezeInput from '@/Components/Input.vue';
@@ -24,7 +23,7 @@ const form = ref({
 });
 
 const handleSubmit = () => {
-    Inertia.post(route('part-inventories.store'), {parts: parts.value});
+    router.post(route('part-inventories.store'), {parts: parts.value});
 }
 
 const gridApi = ref(null); // Optional - for accessing Grid's API
@@ -136,7 +135,7 @@ function isPositiveNumber(str) {
                 <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                     Part Inventories
                 </h2>
-                <Button @click="Inertia.visit(route('part-inventories.index'))">Back</Button>
+                <Button @click="router.visit(route('part-inventories.index'))">Back</Button>
             </div>
         </template>
 

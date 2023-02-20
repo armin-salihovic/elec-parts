@@ -5,7 +5,7 @@ import BreezeDropdown from '@/Components/Dropdown.vue';
 import BreezeDropdownLink from '@/Components/DropdownLink.vue';
 import BreezeNavLink from '@/Components/NavLink.vue';
 import BreezeResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
-import { Link } from '@inertiajs/inertia-vue3';
+import { Link } from '@inertiajs/vue3';
 
 const fullPageLayout = ref(true);
 
@@ -43,6 +43,9 @@ const showingNavigationDropdown = ref(false);
                                 </BreezeNavLink>
                                 <BreezeNavLink :href="route('part-inventories.index')" :active="route().current('part-inventories.index')">
                                     Inventory
+                                </BreezeNavLink>
+                                <BreezeNavLink :href="route('projects.index')" :active="route().current('projects.index')">
+                                    Projects
                                 </BreezeNavLink>
                             </div>
                         </div>

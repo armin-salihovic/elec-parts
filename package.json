@@ -5,9 +5,6 @@
         "build": "vite build"
     },
     "devDependencies": {
-        "@inertiajs/inertia": "^0.11.0",
-        "@inertiajs/inertia-vue3": "^0.6.0",
-        "@inertiajs/progress": "^0.2.7",
         "@tailwindcss/forms": "^0.5.2",
         "@vitejs/plugin-vue": "^3.0.0",
         "alpinejs": "^3.4.2",
@@ -23,6 +20,7 @@
     "dependencies": {
         "@headlessui/vue": "^1.6.7",
         "@heroicons/vue": "^2.0.4",
+        "@inertiajs/vue3": "^1.0.2",
         "ag-grid-community": "^28.1.0",
         "ag-grid-vue3": "^28.1.0",
         "primeicons": "^5.0.0",

@@ -1,8 +1,7 @@
 <script setup>
 import BreezeAuthenticatedLayout from '@/Layouts/Authenticated.vue';
-import { Head } from '@inertiajs/inertia-vue3';
+import { Head, router } from '@inertiajs/vue3';
 import Button from "@/Components/Button.vue";
-import { Inertia } from '@inertiajs/inertia'
 
 import { onMounted, ref } from "vue";
 import DataTable from "primevue/datatable";
@@ -47,7 +46,7 @@ function onRowEditSave(event) {
 
     if(Number(newData.quantity) === Number(data.quantity)) return;
 
-    Inertia.put(route('parts.update', newData.id), newData, {
+    router.put(route('parts.update', newData.id), newData, {
         replace: false,
         preserveState: true,
         preserveScroll: true,
@@ -76,7 +75,7 @@ function onPage (event) {
 
 function loadLazyData() {
     const url = buildQueryUrl(lazyParams.value, route('parts.index'));
-    Inertia.visit(url, {
+    router.visit(url, {
         preserveState: true,
         preserveScroll: true,
         onStart: () => { loading.value = true; },
@@ -95,7 +94,7 @@ function loadLazyData() {
                 <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                     Parts
                 </h2>
-                <Button @click="Inertia.visit(route('parts.create'))">Create</Button>
+                <Button @click="router.visit(route('parts.create'))">Create</Button>
             </div>
         </template>
 

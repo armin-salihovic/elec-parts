@@ -32,7 +32,6 @@ import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 import { ChevronDownIcon } from '@heroicons/vue/24/solid'
 import ATaydaModal from "@/Components/ATaydaModal.vue";
 import {ref} from "vue";
-import {Inertia} from "@inertiajs/inertia";
 
 const taydaModal = ref(null);
 
