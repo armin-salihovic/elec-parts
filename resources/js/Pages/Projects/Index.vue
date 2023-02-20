@@ -10,6 +10,7 @@ import Paginator from "primevue/paginator";
 import InputText from "primevue/inputtext";
 import {FilterMatchMode, FilterOperator} from "primevue/api";
 import {buildQueryUrl} from "@/primevue-datatable-params-builder";
+import CrudButton from "@/Components/CrudButton.vue";
 
 const loading = ref(false);
 
@@ -45,6 +46,10 @@ function onRowEditSave(event) {
         preserveState: true,
         preserveScroll: true,
     });
+}
+
+function onShow(id) {
+    router.visit(route('projects.show', id));
 }
 
 // datatable events
@@ -120,6 +125,11 @@ function loadLazyData() {
                             </template>
                         </Column>
                         <Column :rowEditor="true" style="" bodyStyle="text-align:center; padding: 0"></Column>
+                        <Column headerStyle="width: 4rem; text-align: center" bodyStyle="text-align: center; overflow: visible; padding: 0">
+                            <template #body="{data}">
+                                <CrudButton type="show" @click="onShow(data.id)" />
+                            </template>
+                        </Column>
                     </DataTable>
 
                     <Paginator :first="data.from" :rows="data.per_page" :totalRecords="data.total" @page="onPage($event)"/>

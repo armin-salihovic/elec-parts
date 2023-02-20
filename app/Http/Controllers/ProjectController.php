@@ -33,18 +33,31 @@ class ProjectController extends Controller
         return Inertia::render('Projects/Create');
     }
 
+    public function show(Project $project)
+    {
+        return Inertia::render('Projects/Edit',[
+            'project_name' => $project->name,
+            'project_details' => [
+                'bom_entries' => $project->projectParts->count(),
+                'description' => $project->description,
+                'created_at' => date('M. d, Y', strtotime($project->created_at)) . ' (' . $project->created_at->diffForHumans() . ')',
+                'updated_at' => date('M. d, Y', strtotime($project->created_at)) . ' (' . $project->updated_at->diffForHumans() . ')',
+            ],
+        ]);
+    }
+
     public function store(Request $request)
     {
         $request->validate([
             'name' => ['required', 'max:50'],
         ]);
 
-        Project::create([
+        $project = Project::create([
             'name' => $request->name,
             'user_id' => auth()->user()->id,
         ]);
 
-        return Redirect::route('projects.index');
+        return Redirect::route('projects.show', $project->id);
     }
 
     public function update(Project $project, Request $request)
@@ -55,6 +68,13 @@ class ProjectController extends Controller
 
         $project->update([
             'name' => $request->name,
+        ]);
+    }
+
+    public function updateDescription(Project $project, Request $request)
+    {
+        $project->update([
+            'description' => $request->description,
         ]);
     }
 

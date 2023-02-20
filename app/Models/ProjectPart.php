@@ -4,16 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Project extends Model
+class ProjectPart extends Model
 {
     use HasFactory;
 
     protected $guarded = [];
 
-    public function projectParts(): HasMany
+    public function project(): BelongsTo
     {
-        return $this->hasMany(ProjectPart::class);
+        return $this->belongsTo(Project::class);
     }
 }
