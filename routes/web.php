@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PartController;
-use App\Http\Controllers\PartInventoryController;
+use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectPartController;
 use Illuminate\Foundation\Application;
@@ -39,7 +39,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('projects', ProjectController::class);
     Route::put('projects/{project}/description',  [ProjectController::class, 'updateDescription'])->name('projects-description.update');
     Route::get('sku-part', [PartController::class, 'findBySKU'])->name('sku-part');
-    Route::resource('part-inventories', PartInventoryController::class);
+    Route::resource('inventories', InventoryController::class);
     Route::post('tayda-pdf-to-products', [PartController::class, 'pdfToProducts'])->name('tayda-pdf-to-products');
     Route::get('projects/{project}/bom', [ProjectPartController::class, 'index'])->name('project-parts.index');
     Route::post('projects/{project}/bom', [ProjectPartController::class, 'store'])->name('project-parts.store');

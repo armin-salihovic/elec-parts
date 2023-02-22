@@ -23,7 +23,7 @@ const form = ref({
 });
 
 const handleSubmit = () => {
-    router.post(route('part-inventories.store'), {parts: parts.value});
+    router.post(route('inventories.store'), {parts: parts.value});
 }
 
 const gridApi = ref(null); // Optional - for accessing Grid's API
@@ -127,15 +127,15 @@ function isPositiveNumber(str) {
 </script>
 
 <template>
-    <Head title="Part Inventories" />
+    <Head title="Create Inventory" />
 
     <BreezeAuthenticatedLayout>
         <template #header>
             <div class="flex justify-between">
                 <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                    Part Inventories
+                    Create Inventory
                 </h2>
-                <Button @click="router.visit(route('part-inventories.index'))">Back</Button>
+                <Button @click="router.visit(route('inventories.index'))">Back</Button>
             </div>
         </template>
 

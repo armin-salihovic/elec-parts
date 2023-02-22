@@ -47,7 +47,7 @@ function onRowEditSave(event) {
 
     if(Number(newData.quantity) === Number(data.quantity)) return;
 
-    router.put(route('part-inventories.update', newData.id), newData, {
+    router.put(route('inventories.update', newData.id), newData, {
         replace: false,
         preserveState: true,
         preserveScroll: true,
@@ -75,7 +75,7 @@ function onPage (event) {
 // data is lazy loaded whenever a datatable related event fires
 
 function loadLazyData() {
-    const url = buildQueryUrl(lazyParams.value, route('part-inventories.index'));
+    const url = buildQueryUrl(lazyParams.value, route('inventories.index'));
     router.visit(url, {
         preserveState: true,
         preserveScroll: true,
@@ -87,15 +87,15 @@ function loadLazyData() {
 </script>
 
 <template>
-    <Head title="Part Inventories" />
+    <Head title="Inventories" />
 
     <BreezeAuthenticatedLayout>
         <template #header>
             <div class="flex justify-between">
                 <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                    Part Inventories
+                    Inventories
                 </h2>
-                <Button @click="router.visit(route('part-inventories.create'))">Create</Button>
+                <Button @click="router.visit(route('inventories.create'))">Create</Button>
             </div>
         </template>
 

@@ -13,9 +13,9 @@ class Part extends Model
 
     protected $guarded = [];
 
-    public function partInventories(): HasMany
+    public function inventories(): HasMany
     {
-        return $this->hasMany(PartInventory::class);
+        return $this->hasMany(Inventory::class);
     }
 
     public function source(): BelongsTo
