@@ -2,17 +2,17 @@
 import BreezeAuthenticatedLayout from '@/Layouts/Authenticated.vue';
 import { Head, router } from '@inertiajs/vue3';
 import Button from "@/Components/Button.vue";
-import {provide, reactive, ref} from "vue";
+import {provide, ref} from "vue";
 import BreezeButton from '@/Components/Button.vue';
 import BreezeInput from '@/Components/Input.vue';
 import BreezeLabel from '@/Components/Label.vue';
 import ADropdown from "@/Components/ADropdown.vue";
-import CircleButtonCellRenderer from "@/Components/CircleButtonCellRenderer.vue";
+import DataTable from "primevue/datatable";
+import Column from "primevue/column";
+import InputText from "primevue/inputtext";
 
-import { AgGridVue } from "ag-grid-vue3";  // the AG Grid Vue Component
-import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
-import "ag-grid-community/styles/ag-theme-material.css"; // Optional theme CSS
 import axios from "axios";
+import CrudButton from "@/Components/CrudButton.vue";
 
 const parts = ref([]);
 provide('addItem', addItem);
@@ -25,56 +25,6 @@ const form = ref({
 const handleSubmit = () => {
     router.post(route('inventories.store'), {parts: parts.value});
 }
-
-const gridApi = ref(null); // Optional - for accessing Grid's API
-
-// Obtain API from grid's onGridReady event
-const onGridReady = (params) => {
-    gridApi.value = params.api;
-};
-
-const rowData = reactive({}); // Set rowData to Array of Objects, one Object per Row
-
-// Each Column Definition results in one Column.
-const columnDefs = reactive({
-    value: [
-        { field: "name" },
-        { field: "sku" },
-        { field: "category" },
-        {
-            field: "quantity",
-            valueGetter: params => {
-                return params.data.quantity;
-            },
-            valueSetter: params => {
-                if(isPositiveNumber(params.newValue)) {
-                    params.data.quantity = Number(params.newValue);
-                    return true;
-                }
-                alert("problem");
-                return false;
-            },
-            editable: true,
-        },
-        { field: "source" },
-        {
-            field: "Delete",
-            cellRenderer: CircleButtonCellRenderer,
-            cellRendererParams: {
-                clicked: function(field) {
-                    deleteItem(field.data.id);
-                }
-            }
-        },
-    ],
-});
-
-// DefaultColDef sets props common to all Columns
-const defaultColDef = {
-    sortable: true,
-    filter: true,
-    flex: 1
-};
 
 const props = defineProps({
     data: Object,
@@ -95,9 +45,6 @@ async function addItem(part) {
     } else {
         parts.value[index].quantity += Number(part.quantity);
     }
-
-    gridApi.value.setRowData(parts.value);
-
 }
 
 function deleteItem(id) {
@@ -115,6 +62,7 @@ const fetchProductBySku = async () => {
 }
 
 function isPositiveNumber(str) {
+    str = String(str);
     str = str.trim();
     if (!str) {
         return false;
@@ -122,6 +70,21 @@ function isPositiveNumber(str) {
     str = str.replace(/^0+/, "") || "0";
     const n = Math.floor(Number(str));
     return n !== Infinity && String(n) === str && n >= 0;
+}
+
+// datatable
+
+function onCellEditComplete(event) {
+    let { data, newValue, field } = event;
+
+    switch (field) {
+        case 'quantity':
+            if (isPositiveNumber(newValue))
+                data[field] = Number(newValue);
+            else
+                event.preventDefault();
+            break;
+    }
 }
 
 </script>
@@ -160,28 +123,75 @@ function isPositiveNumber(str) {
                                 </div>
                                 <div class="ml-auto">
                                     <ADropdown />
-                                    <BreezeButton @click="handleSubmit" class="ml-5" :disabled="!parts.length">
+                                    <BreezeButton type="button" @click="handleSubmit" class="ml-5" :disabled="!parts.length">
                                         Save
                                     </BreezeButton>
                                 </div>
                             </div>
                         </form>
+                        <div style="height: calc(100vh - 400px)">
+                            <DataTable :value="parts"
+                                       tableStyle="width:auto"
+                                       class="mt-5"
+                                       editMode="cell"
+                                       @cell-edit-complete="onCellEditComplete"
+                                       :scrollable="true"
+                                       scrollHeight="flex"
+                                       height="400px"
+                            >
+                                <template #empty>
+                                    <div class="w-full text-center">No records found.</div>
+                                </template>
+                                <Column field="name" header="Name">
+                                    <template #body="{data}">
+                                        <div :title="data['name']" class="whitespace-nowrap overflow-hidden text-ellipsis">
+                                            {{ data['name'] }}
+                                        </div>
+                                    </template>
+                                </Column>
+                                <Column field="sku" header="SKU"></Column>
+                                <Column field="category" header="Category"></Column>
+                                <Column field="quantity" header="Quantity" style="width:25%" dataType="numeric" :showFilterOperator="false" :max-constraints="1" :sortable="true">
+                                    <template #editor="{ data, field }">
+                                        <InputText v-model="data[field]" />
+                                    </template>
+                                </Column>
+                                <Column field="location" header="Location"></Column>
+                                <Column header="Delete" bodyStyle="text-align: center; overflow: visible; padding: 0">
+                                    <template #body="{data}">
+                                        <div class="flex gap-3">
+                                            <CrudButton type="delete" @click="deleteItem(data['id'])" />
+                                        </div>
+                                    </template>
+                                </Column>
+                            </DataTable>
 
-                        <ag-grid-vue
-                            v-if="parts"
-                            class="ag-theme-material"
-                            style="height: 500px"
-                            :columnDefs="columnDefs.value"
-                            :rowData="parts"
-                            :defaultColDef="defaultColDef"
-                            rowSelection="multiple"
-                            animateRows="true"
-                            @grid-ready="onGridReady"
-                        >
-                        </ag-grid-vue>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </BreezeAuthenticatedLayout>
 </template>
+
+<style scoped>
+
+::v-deep(.p-datatable-tbody td) {
+    white-space: nowrap;
+    overflow: hidden !important;
+    text-overflow: ellipsis;
+}
+
+@media (max-width: 960px) {
+    ::v-deep(.p-datatable-table) {
+        table-layout: auto !important;
+        width: auto !important;
+    }
+}
+
+::v-deep(td.p-editable-column.p-cell-editing) {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+</style>
