@@ -4,8 +4,7 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Models\Part;
-use App\Models\PartCategory;
-use App\Models\PedalType;
+use App\Models\Category;
 use App\Models\Source;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -44,12 +43,12 @@ class DatabaseSeeder extends Seeder
 
     public static function getCategoryID($category)
     {
-        $partCategory = PartCategory::where('name', $category[count($category) - 1])->get();
+        $partCategory = Category::where('name', $category[count($category) - 1])->get();
         if ($partCategory->count() == 1) {
             return $partCategory[0]->id;
         }
 
-        $nodes = PartCategory::whereIsRoot()->get();
+        $nodes = Category::whereIsRoot()->get();
         return DatabaseSeeder::findCategoryIDinTree($nodes, $category);
     }
 
@@ -84,7 +83,7 @@ class DatabaseSeeder extends Seeder
             'Mouser',
             'DigiKey',
             'Farnell',
-            'Other',
+            'Local',
         ];
 
         foreach ($partSources as $name) {
@@ -96,7 +95,7 @@ class DatabaseSeeder extends Seeder
         DatabaseSeeder::addSourceToCategories($json, 1);
 
         foreach ($json as $value) {
-            PartCategory::create($value);
+            Category::create($value);
         }
 
         $json_string = Storage::disk('local')->get('products_cleaned.json');
@@ -109,7 +108,7 @@ class DatabaseSeeder extends Seeder
                 'sku' => $value['sku'],
                 'price' => $value['price'],
                 'url' => $value['url'],
-                'part_category_id' => DatabaseSeeder::getCategoryID($value['category']),
+                'category_id' => DatabaseSeeder::getCategoryID($value['category']),
                 'source_id' => 1
             ]);
         }

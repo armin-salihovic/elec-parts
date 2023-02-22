@@ -9,6 +9,7 @@ use App\Models\Source;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
+use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class PartController extends Controller
@@ -16,7 +17,9 @@ class PartController extends Controller
     public function index()
     {
         $parts = QueryBuilder::for(Part::class)
-            ->allowedFilters(['name', 'sku', 'source.name'])
+            ->where('user_id', auth()->user()->id)
+            ->allowedFilters(['name', 'sku', 'description', 'category.name', AllowedFilter::exact('price')])
+            ->allowedSorts('price')
             ->paginate(10)
             ->appends(request()->query())
             ->through(function ($part) {
@@ -24,45 +27,91 @@ class PartController extends Controller
                     'id' => $part->id,
                     'name' => $part->name,
                     'sku' => $part->sku,
+                    'price' => $part->price,
+                    'description' => $part->description,
                     'url' => $part->url,
-                    'source.name' => $part->source->name,
+                    'category.name' => $part->category->name,
                 ];
             });
 
-        $sources = Source::all()->map(function ($source) {
-            return [
-                'name' => $source->name,
-            ];
-        });
-
         return Inertia::render('Parts/Index', [
             'data' => $parts,
-            'sources' => $sources,
+            'categories' => auth()->user()->categories,
         ]);
     }
 
     public function create()
     {
-        return Inertia::render('Parts/Create');
+        $categories = auth()->user()->categories->map(function ($category) {
+            return [
+                'id' => $category->id,
+                'name' => $category->name,
+            ];
+        });
+
+        return Inertia::render('Parts/Create', [
+            'categories' => $categories,
+        ]);
     }
 
-    public function store()
+    public function edit(Part $part)
     {
-        Part::create(
-            Request::validate([
-                'name' => ['required', 'max:50'],
-            ])
-        );
+        $categories = auth()->user()->categories->map(function ($category) {
+            return [
+                'id' => $category->id,
+                'name' => $category->name,
+            ];
+        });
+
+        return Inertia::render('Parts/Edit', [
+            'part' => [
+                'name' => $part->name,
+                'sku' => $part->sku,
+                'price' => $part->price,
+                'url' => $part->url,
+                'description' => $part->description,
+                'category_id' => $part->category_id,
+            ],
+            'categories' => $categories,
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => ['required', 'max:50'],
+        ]);
+
+        Part::create([
+            'name' => $request->name,
+            'sku' => $request->sku,
+            'price' => $request->price,
+            'url' => $request->url,
+            'description' => $request->description,
+            'category_id' => $request->category_id,
+            'source_id' => Source::where('name', 'Local')->first()->id,
+            'user_id' => auth()->user()->id,
+        ]);
+
         return Redirect::route('parts.index');
     }
 
-    public function update(Part $part)
+    public function update(Part $part, Request $request)
     {
-        $part->update(
-            Request::validate([
-                'name' => ['required', 'max:50'],
-            ])
-        );
+        $request->validate([
+            'name' => ['required', 'max:50'],
+        ]);
+
+        $part->update([
+            'name' => $request->name,
+            'sku' => $request->sku,
+            'price' => $request->price,
+            'url' => $request->url,
+            'description' => $request->description,
+            'category_id' => $request->category_id,
+        ]);
+
+        return Redirect::route('parts.index');
     }
 
     public function show(Part $part)
@@ -72,11 +121,11 @@ class PartController extends Controller
 
     public function findBySKU(Request $request)
     {
-        if($sku = $request->input('sku')) {
+        if ($sku = $request->input('sku')) {
             $part = Part::where('sku', $sku)->first();
 
-            if($part === null) {
-                return response()->json(['message' => "SKU <".$sku."> was not found."], 400);
+            if ($part === null) {
+                return response()->json(['message' => "SKU <" . $sku . "> was not found."], 400);
             }
 
             return new PartResource($part);
@@ -85,15 +134,16 @@ class PartController extends Controller
         return response()->json('Missing the SKU parameter.', 400);
     }
 
-    private static function processDocument($page) {
+    private static function processDocument($page)
+    {
         $array = [];
         for ($i = 0; $i < count($page); $i++) {
-            if($page[$i][0] == '$' && $page[$i+1][0] == '$') {
+            if ($page[$i][0] == '$' && $page[$i + 1][0] == '$') {
                 $item = [];
-                $item['sku'] = $page[$i-2];
-                $item['quantity'] = $page[$i-1];
+                $item['sku'] = $page[$i - 2];
+                $item['quantity'] = $page[$i - 1];
                 $item['price'] = $page[$i];
-                $item['total'] = $page[$i+1];
+                $item['total'] = $page[$i + 1];
                 $array[] = $item;
                 $i += 2;
             }
@@ -134,10 +184,10 @@ class PartController extends Controller
 
             foreach ($products as $product) {
                 $part = Part::where('sku', $product['sku'])->first();
-                if($part === null) {
+                if ($part === null) {
                     $part = PartController::fixSkuError($documentArray, $product);
 
-                    if($part === null) {
+                    if ($part === null) {
                         $failed[]['product'] = $product;
                         continue;
                     }
@@ -147,10 +197,10 @@ class PartController extends Controller
                 $partsCollection->push($part);
             }
 
-            if(count($failed) > 0) {
-                dump("Failed products: ".count($failed));
+            if (count($failed) > 0) {
+                dump("Failed products: " . count($failed));
                 dump($failed);
-            } else if(count($products) === 0) {
+            } else if (count($products) === 0) {
                 dd("failed");
             }
 

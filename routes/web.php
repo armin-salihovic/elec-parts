@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\PartCategoryController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PartController;
 use App\Http\Controllers\PartInventoryController;
 use App\Http\Controllers\ProjectController;
@@ -34,7 +34,7 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::resource('part-categories', PartCategoryController::class);
+    Route::resource('categories', CategoryController::class);
     Route::resource('parts', PartController::class);
     Route::resource('projects', ProjectController::class);
     Route::put('projects/{project}/description',  [ProjectController::class, 'updateDescription'])->name('projects-description.update');

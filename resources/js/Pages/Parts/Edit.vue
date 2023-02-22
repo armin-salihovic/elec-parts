@@ -2,13 +2,16 @@
 import BreezeAuthenticatedLayout from '@/Layouts/Authenticated.vue';
 import { Head, router } from '@inertiajs/vue3';
 import Button from "@/Components/Button.vue";
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 import BreezeButton from '@/Components/Button.vue';
 import BreezeInput from '@/Components/Input.vue';
 import BreezeLabel from '@/Components/Label.vue';
 import Dropdown from "primevue/dropdown";
 
-defineProps({
+const props = defineProps({
+    part: {
+        type: Object,
+    },
     categories: {
         type: Object,
     }
@@ -30,19 +33,24 @@ const selectedCategory = ref({
 
 const submit = () => {
     form.value.category_id = selectedCategory.value;
-    router.post(route('parts.store'), form.value);
+    router.put(route('parts.update', route().params.part), form.value);
 };
+
+onMounted(() => {
+    form.value = props.part;
+    selectedCategory.value = form.value.category_id;
+})
 
 </script>
 
 <template>
-    <Head title="Create Part" />
+    <Head title="Edit Part" />
 
     <BreezeAuthenticatedLayout>
         <template #header>
             <div class="flex justify-between">
                 <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                    Create Part
+                    Edit Part
                 </h2>
                 <Button @click="router.visit(route('parts.index'))">Back</Button>
             </div>

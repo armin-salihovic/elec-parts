@@ -12,21 +12,21 @@ const form = ref({
 });
 
 const submit = () => {
-    router.post(route('part-sources.store'), form.value);
+    router.post(route('categories.store'), form.value);
 };
 
 </script>
 
 <template>
-    <Head title="Part Sources" />
+    <Head title="Create Categories" />
 
     <BreezeAuthenticatedLayout>
         <template #header>
             <div class="flex justify-between">
                 <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                    Part Sources
+                    Create Category
                 </h2>
-                <Button @click="router.visit(route('part-sources.index'))">Back</Button>
+                <Button @click="router.visit(route('categories.index'))">Back</Button>
             </div>
         </template>
 

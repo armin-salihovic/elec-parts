@@ -15,12 +15,14 @@ return new class extends Migration
     {
         Schema::create('parts', function (Blueprint $table) {
             $table->id();
-            $table->string("name");
-            $table->string("sku");
-            $table->decimal("price");
-            $table->string("url");
-            $table->foreignId("part_category_id")->constrained();
-            $table->foreignId("source_id")->constrained();
+            $table->string('name');
+            $table->string('sku')->nullable();
+            $table->decimal('price')->nullable();
+            $table->string('url')->nullable();
+            $table->string('description')->nullable();
+            $table->foreignId('category_id')->constrained();
+            $table->foreignId('source_id')->constrained();
+            $table->foreignId('user_id')->nullable()->constrained();
             $table->timestamps();
         });
     }
