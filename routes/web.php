@@ -40,6 +40,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('projects', ProjectController::class);
     Route::put('projects/{project}/description',  [ProjectController::class, 'updateDescription'])->name('projects-description.update');
     Route::get('sku-part', [PartController::class, 'findBySKU'])->name('sku-part');
+    Route::get('inventories/locations', [LocationController::class, 'index'])->name('locations.index');
     Route::resource('inventories', InventoryController::class);
     Route::post('tayda-pdf-to-products', [PartController::class, 'pdfToProducts'])->name('tayda-pdf-to-products');
     Route::get('projects/{project}/bom', [ProjectPartController::class, 'index'])->name('project-parts.index');
@@ -47,6 +48,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('bom/{project_part}', [ProjectPartController::class, 'update'])->name('project-parts.update');
     Route::delete('bom/{project_part}', [ProjectPartController::class, 'destroy'])->name('project-parts.destroy');
     Route::post('locations', [LocationController::class, 'store'])->name('locations.store');
+    Route::put('locations/{location}', [LocationController::class, 'update'])->name('locations.update');
+    Route::delete('locations/{location}', [LocationController::class, 'destroy'])->name('locations.destroy');
 });
 
 require __DIR__ . '/auth.php';
