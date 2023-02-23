@@ -2,7 +2,7 @@
 import BreezeAuthenticatedLayout from '@/Layouts/Authenticated.vue';
 import { Head, router } from '@inertiajs/vue3';
 import Button from "@/Components/Button.vue";
-import {provide, ref} from "vue";
+import {onMounted, provide, ref} from "vue";
 import BreezeButton from '@/Components/Button.vue';
 import BreezeInput from '@/Components/Input.vue';
 import BreezeLabel from '@/Components/Label.vue';
@@ -10,9 +10,9 @@ import ADropdown from "@/Components/ADropdown.vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import InputText from "primevue/inputtext";
-
 import axios from "axios";
 import CrudButton from "@/Components/CrudButton.vue";
+import Dropdown from 'primevue/dropdown';
 
 const parts = ref([]);
 provide('addItem', addItem);
@@ -28,18 +28,27 @@ const handleSubmit = () => {
 
 const props = defineProps({
     data: Object,
-    create_url: String,
     part: Object,
+    locations: Object,
+    location_id: Number | String,
+})
+
+const locationId = ref(null);
+
+onMounted(() => {
+    locationId.value = Number(props['location_id']);
 })
 
 async function addItem(part) {
     const index = parts.value.findIndex((x) => x.sku === part.sku);
 
     if (index === -1) {
+        // this condition is used when a single part is being added (i.e., the form has no name attribute)
         if (part.name === undefined) {
             await fetchProductBySku();
         } else {
             part.quantity = Number(part.quantity);
+            part.location = structuredClone(locationId.value);
             parts.value.push(part);
         }
     } else {
@@ -52,10 +61,16 @@ function deleteItem(id) {
 }
 
 const fetchProductBySku = async () => {
-    return await axios.get(`${route('sku-part')}?sku=${form.value.sku}`).then(({data}) => {
+    return await axios.get(route('sku-part'), {
+        params: {
+            sku: form.value.sku,
+        }
+    }).then(({data}) => {
         const part = data.data;
 
         part.quantity = Number(form.value.quantity);
+
+        part.location = structuredClone(locationId.value);
 
         parts.value.push(part);
     })
@@ -122,7 +137,8 @@ function onCellEditComplete(event) {
                                     </BreezeButton>
                                 </div>
                                 <div class="ml-auto">
-                                    <ADropdown />
+                                    <Dropdown v-model="locationId" :options="locations" optionValue="id" optionLabel="name" placeholder="Select a Location" />
+                                    <ADropdown class="ml-5" />
                                     <BreezeButton type="button" @click="handleSubmit" class="ml-5" :disabled="!parts.length">
                                         Save
                                     </BreezeButton>
@@ -156,7 +172,11 @@ function onCellEditComplete(event) {
                                         <InputText v-model="data[field]" />
                                     </template>
                                 </Column>
-                                <Column field="location" header="Location"></Column>
+                                <Column field="location" header="Location" style="width: 200px">
+                                    <template #body="{ data, field }">
+                                        <Dropdown v-model="data[field]" :options="locations" optionValue="id" optionLabel="name" placeholder="Select a Location" />
+                                    </template>
+                                </Column>
                                 <Column header="Delete" bodyStyle="text-align: center; overflow: visible; padding: 0">
                                     <template #body="{data}">
                                         <div class="flex gap-3">
@@ -165,7 +185,6 @@ function onCellEditComplete(event) {
                                     </template>
                                 </Column>
                             </DataTable>
-
                         </div>
                     </div>
                 </div>

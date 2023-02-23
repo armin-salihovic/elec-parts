@@ -18,6 +18,7 @@ const loading = ref(false);
 const props = defineProps({
     data: Object,
     sources: Object,
+    locations: Object,
     create_url: String,
 })
 
@@ -29,6 +30,7 @@ const filters = ref({
     'part.sku': { operator: FilterOperator.AND, constraints: [{value: null, matchMode: FilterMatchMode.EQUALS}]},
     'quantity': { operator: FilterOperator.AND, constraints: [{value: null, matchMode: FilterMatchMode.EQUALS}]},
     'part.source.name': { value: null, matchMode: FilterMatchMode.IN},
+    'location.name': { value: null, matchMode: FilterMatchMode.IN},
 });
 
 const lazyParams = ref({});
@@ -144,22 +146,22 @@ function loadLazyData() {
                         </Column>
                         <Column header="Distributor" filterField="part.source.name" :showFilterMatchModes="false" :filterMenuStyle="{'width':'14rem'}" style="min-width:14rem" :showFilterOperator="false" :max-constraints="1">
                             <template #body="{data}">
-<!--                                <img :alt="data.representative.name" src="https://www.primefaces.org/wp-content/uploads/2020/05/placeholder.png" width="32" style="vertical-align: middle" />-->
                                 <span class="image-text">{{data["part.source.name"]}}</span>
                             </template>
                             <template #filter="{filterModel}">
                                 <div class="mb-3 font-bold">Distributors</div>
-                                <MultiSelect v-model="filterModel.value" :options="sources" optionLabel="name" placeholder="Any" class="p-column-filter">
-                                    <template #option="slotProps">
-                                        <div class="p-multiselect-representative-option">
-<!--                                            <img :alt="slotProps.option.name" src="https://www.primefaces.org/wp-content/uploads/2020/05/placeholder.png" width="32" style="vertical-align: middle" />-->
-                                            <span class="image-text">{{slotProps.option.name}}</span>
-                                        </div>
-                                    </template>
-                                </MultiSelect>
+                                <MultiSelect v-model="filterModel.value" :options="sources" optionLabel="name" placeholder="Any" />
                             </template>
                         </Column>
-<!--                        <Column field="source" header="Source" ></Column>-->
+                        <Column header="Location" filterField="location.name" :showFilterMatchModes="false" :filterMenuStyle="{'width':'14rem'}" style="min-width:14rem" :showFilterOperator="false" :max-constraints="1">
+                            <template #body="{data}">
+                                <span class="image-text">{{data["location.name"]}}</span>
+                            </template>
+                            <template #filter="{filterModel}">
+                                <div class="mb-3 font-bold">Locations</div>
+                                <MultiSelect v-model="filterModel.value" :options="locations" optionLabel="name" placeholder="Any"/>
+                            </template>
+                        </Column>
                         <Column :rowEditor="true" style="width:10%; min-width:8rem" bodyStyle="text-align:center; padding: 0"></Column>
                     </DataTable>
 

@@ -17,6 +17,7 @@ class PartResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'category' => $this->category->name,
             'sku' => $this->sku,
             'url' => $this->url,
         ];

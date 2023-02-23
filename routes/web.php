@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\LocationController;
 use App\Http\Controllers\PartController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\ProjectController;
@@ -45,6 +46,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('projects/{project}/bom', [ProjectPartController::class, 'store'])->name('project-parts.store');
     Route::put('bom/{project_part}', [ProjectPartController::class, 'update'])->name('project-parts.update');
     Route::delete('bom/{project_part}', [ProjectPartController::class, 'destroy'])->name('project-parts.destroy');
+    Route::post('locations', [LocationController::class, 'store'])->name('locations.store');
 });
 
 require __DIR__ . '/auth.php';
