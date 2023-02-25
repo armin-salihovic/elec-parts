@@ -4,7 +4,6 @@ import {onMounted, ref} from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import Paginator from "primevue/paginator";
-import InputText from "primevue/inputtext";
 import {FilterMatchMode, FilterOperator} from "primevue/api";
 import {buildQueryUrl} from "@/primevue-datatable-params-builder";
 import CrudButton from "@/Components/CrudButton.vue";
@@ -66,7 +65,7 @@ function onPage (event) {
 // data is lazy loaded whenever a datatable related event fires
 
 function loadLazyData() {
-    const url = buildQueryUrl(lazyParams.value, route('locations.index'));
+    const url = buildQueryUrl(lazyParams.value, route('inventory-drafts.index'));
     router.visit(url, {
         preserveState: true,
         preserveScroll: true,
@@ -76,7 +75,11 @@ function loadLazyData() {
 }
 
 function onDelete(id) {
-    router.delete(route('locations.destroy', id));
+    router.delete(route('inventory-drafts.destroy', id));
+}
+
+function onContinue(id) {
+    router.get(route('inventory-drafts.create', id));
 }
 
 </script>
@@ -101,24 +104,13 @@ function onDelete(id) {
                     @filter="onFilter"
                     @sort="onSort($event)"
                 >
-                    <Column field="name" header="Name" :showFilterOperator="false" :max-constraints="1">
-                        <template #editor="{ data, field }">
-                            <InputText v-model="data[field]" />
-                        </template>
-                        <template #body="{data}">
-                            {{data["name"]}}
-                        </template>
-                        <template #filter="{filterModel}">
-                            <InputText type="text" v-model="filterModel.value" class="p-column-filter" placeholder="Search by name"/>
-                        </template>
-                    </Column>
+                    <Column field="id" header="ID" :showFilterOperator="false" :max-constraints="1" />
                     <Column field="size" header="Size" filterField="size" dataType="numeric" :showFilterOperator="false" :max-constraints="1" :sortable="true" />
-                    <Column :rowEditor="true" style="width:10%; min-width:8rem" bodyStyle="text-align:center; padding: 0"></Column>
+                    <Column field="created_at" header="Created" filterField="created_at" dataType="date" :showFilterOperator="false" :max-constraints="1" :sortable="true" />
                     <Column headerStyle="width: 4rem; text-align: center" bodyStyle="text-align: center; overflow: visible; padding: 0">
                         <template #body="{data}">
                             <div class="flex gap-10">
-<!--                                todo: implement show / edit-->
-<!--                                <CrudButton type="show" @click="onShow(data.id)" />-->
+                                <CrudButton type="show" @click="onContinue(data.id)" />
                                 <CrudButton type="delete" @click="onDelete(data.id)" />
                             </div>
                         </template>

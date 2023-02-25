@@ -12,6 +12,11 @@ class Inventory extends Model
 
     protected $guarded = [];
 
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function part(): BelongsTo
     {
         return $this->belongsTo(Part::class);
@@ -20,5 +25,10 @@ class Inventory extends Model
     public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class);
+    }
+
+    public function inventoryDraft(): BelongsTo
+    {
+        return $this->belongsTo(InventoryDraft::class);
     }
 }

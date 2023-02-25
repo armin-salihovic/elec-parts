@@ -52,4 +52,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(Location::class);
     }
+
+    public function inventories(): HasMany
+    {
+        return $this->hasMany(Inventory::class);
+    }
+
+    public function inventoryDrafts(): HasMany
+    {
+        return $this->hasMany(InventoryDraft::class);
+    }
 }

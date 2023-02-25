@@ -65,6 +65,7 @@
 import {inject, ref} from 'vue'
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
 import { ArrowDownTrayIcon, CheckIcon } from '@heroicons/vue/24/outline'
+import {router} from "@inertiajs/vue3";
 
 const open = ref(false);
 
@@ -73,20 +74,13 @@ const processingComplete = ref(false);
 
 const file = ref(null);
 
-const addItem = inject('addItem');
-const pdfParts = ref(null);
+const locationId = inject('locationId');
 
 const errors = ref([]);
 
 defineExpose({
     open
 });
-
-function parsePdfProducts() {
-    pdfParts.value.forEach((part) => {
-        addItem(part);
-    })
-}
 
 function resetModal() {
     processing.value = false;
@@ -102,13 +96,16 @@ const upload = async() => {
     }
     processing.value = true;
 
-    axios.post(route('tayda-pdf-to-products'), {taydaInvoice: file.value.files[0]}, {
+    axios.post(route('tayda-pdf-to-products'), {
+        taydaInvoice: file.value.files[0],
+        locationId: locationId.value,
+        draftId: route().params.inventory_draft,
+    }, {
         headers: {
             'Content-Type': 'multipart/form-data'
         }
     }).then(({data}) => {
-        pdfParts.value = data.data;
-        parsePdfProducts()
+        router.reload({ only: ['parts'] })
         processingComplete.value = true;
     })
 

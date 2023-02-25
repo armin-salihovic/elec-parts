@@ -6,17 +6,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Kalnoy\Nestedset\NodeTrait;
 
-class Category extends Model
+class InventoryDraft extends Model
 {
-    use NodeTrait, HasFactory;
+    use HasFactory;
 
     protected $guarded = [];
 
-    public function parts(): HasMany
+    public function location(): BelongsTo
     {
-        return $this->hasMany(Part::class);
+        return $this->belongsTo(Location::class);
     }
 
     public function user(): BelongsTo
@@ -24,8 +23,8 @@ class Category extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function source(): BelongsTo
+    public function inventories(): HasMany
     {
-        return $this->belongsTo(Source::class);
+        return $this->hasMany(Inventory::class);
     }
 }

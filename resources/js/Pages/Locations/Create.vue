@@ -26,7 +26,7 @@ async function handleLocation() {
         }
     } else {
         if(locationId.value === null) return;
-        router.visit(route('inventories.create', {location: locationId.value}));
+        router.post(route('inventory-drafts.store', locationId.value));
     }
 }
 </script>

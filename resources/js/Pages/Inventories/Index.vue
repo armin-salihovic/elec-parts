@@ -5,11 +5,13 @@ import Button from "@/Components/Button.vue";
 import InventoryLayout from "@/Layouts/InventoryLayout.vue";
 import InventoryParts from "@/Pages/Inventories/InventoryParts.vue";
 import InventoryLocations from "@/Pages/Inventories/InventoryLocations.vue";
+import InventoryDrafts from "@/Pages/Inventories/InventoryDrafts.vue";
 
 const props = defineProps({
     data: Object,
     sources: Object,
     locations: Object,
+    inventory_drafts: Object,
 })
 </script>
 
@@ -28,6 +30,7 @@ const props = defineProps({
         <InventoryLayout>
             <InventoryParts :data="data" :sources="sources" :locations="locations" />
             <InventoryLocations :data="locations" v-if="!sources" />
+            <InventoryDrafts :data="inventory_drafts" v-if="!sources" />
         </InventoryLayout>
     </BreezeAuthenticatedLayout>
 </template>

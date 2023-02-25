@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\PartResource;
 use App\Http\Resources\PartWithQuantityResource;
+use App\Models\Inventory;
+use App\Models\InventoryDraft;
 use App\Models\Part;
 use App\Models\Source;
 use Illuminate\Http\Request;
@@ -119,21 +120,6 @@ class PartController extends Controller
 
     }
 
-    public function findBySKU(Request $request)
-    {
-        if ($sku = $request->input('sku')) {
-            $part = Part::where('sku', $sku)->first();
-
-            if ($part === null) {
-                return response()->json(['message' => "SKU <" . $sku . "> was not found."], 400);
-            }
-
-            return new PartResource($part);
-        }
-
-        return response()->json('Missing the SKU parameter.', 400);
-    }
-
     private static function processDocument($page)
     {
         $array = [];
@@ -164,13 +150,22 @@ class PartController extends Controller
 
     public function pdfToProducts(Request $request)
     {
+        $request->validate([
+            'locationId' => 'required',
+            'draftId' => 'required',
+
+        ]);
+
+        if (!auth()->user()->locations->contains('id', $request->input('locationId'))) return;
+
+        if (!auth()->user()->inventoryDrafts->contains('id', $request->input('draftId'))) return;
+
         if ($request->hasFile('taydaInvoice')) {
 
             // Parse PDF file and build necessary objects.
             $parser = new \Smalot\PdfParser\Parser();
 
             $pdf = $parser->parseFile($request->file('taydaInvoice'));
-
 
             $text = $pdf->getText();
             $text = trim(preg_replace('/\s+/', ' ', $text));
@@ -203,6 +198,24 @@ class PartController extends Controller
             } else if (count($products) === 0) {
                 dd("failed");
             }
+
+            $inventoryDraft = InventoryDraft::find($request->input('draftId'));
+            $inventoryDraft->update(['location_id' => $request->input('locationId')]);
+
+            $partsCollection->map(function ($part) use ($inventoryDraft) {
+                if ($inventory = $inventoryDraft->inventories->where('part_id', $part->id)->where('location_id', $inventoryDraft->location->id)->first()) {
+                    $inventory->quantity += $part->quantity;
+                    $inventory->save();
+                } else {
+                    Inventory::create([
+                        'part_id' => $part->id,
+                        'location_id' => $inventoryDraft->location->id,
+                        'inventory_draft_id' => $inventoryDraft->id,
+                        'user_id' => auth()->user()->id,
+                        'quantity' => $part->quantity,
+                    ]);
+                }
+            });
 
             return PartWithQuantityResource::collection($partsCollection);
         }

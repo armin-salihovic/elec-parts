@@ -14,16 +14,13 @@ import axios from "axios";
 import CrudButton from "@/Components/CrudButton.vue";
 import Dropdown from 'primevue/dropdown';
 
-const parts = ref([]);
-provide('addItem', addItem);
-
 const form = ref({
     sku: '',
     quantity: 1,
 });
 
 const handleSubmit = () => {
-    router.post(route('inventories.store'), {parts: parts.value});
+    router.post(route('inventories.store', route().params.inventory_draft));
 }
 
 const props = defineProps({
@@ -31,48 +28,35 @@ const props = defineProps({
     part: Object,
     locations: Object,
     location_id: Number | String,
+    parts: Object,
 })
 
 const locationId = ref(null);
+provide('locationId', locationId);
 
 onMounted(() => {
     locationId.value = Number(props['location_id']);
 })
 
 async function addItem(part) {
-    const index = parts.value.findIndex((x) => x.sku === part.sku);
-
-    if (index === -1) {
-        // this condition is used when a single part is being added (i.e., the form has no name attribute)
-        if (part.name === undefined) {
-            await fetchProductBySku();
-        } else {
-            part.quantity = Number(part.quantity);
-            part.location = structuredClone(locationId.value);
-            parts.value.push(part);
-        }
-    } else {
-        parts.value[index].quantity += Number(part.quantity);
-    }
+    await addProductBySku();
 }
 
 function deleteItem(id) {
-    parts.value = parts.value.filter((part) => { return part.id !== id });
+    router.delete(route('inventories.destroy', id));
 }
 
-const fetchProductBySku = async () => {
-    return await axios.get(route('sku-part'), {
-        params: {
-            sku: form.value.sku,
-        }
+function changeLocation(inventoryId, locationId) {
+    router.put(route('inventories.location.update', inventoryId), {location: locationId})
+}
+
+const addProductBySku = async () => {
+    return await axios.post(route('sku-part', {draft: route().params.inventory_draft}), {
+        sku: form.value.sku,
+        location: locationId.value,
+        quantity: form.value.quantity,
     }).then(({data}) => {
-        const part = data.data;
-
-        part.quantity = Number(form.value.quantity);
-
-        part.location = structuredClone(locationId.value);
-
-        parts.value.push(part);
+        router.reload({ only: ['parts'] })
     })
 }
 
@@ -139,7 +123,7 @@ function onCellEditComplete(event) {
                                 <div class="ml-auto">
                                     <Dropdown v-model="locationId" :options="locations" optionValue="id" optionLabel="name" placeholder="Select a Location" />
                                     <ADropdown class="ml-5" />
-                                    <BreezeButton type="button" @click="handleSubmit" class="ml-5" :disabled="!parts.length">
+                                    <BreezeButton type="button" @click="handleSubmit" class="ml-5">
                                         Save
                                     </BreezeButton>
                                 </div>
@@ -174,7 +158,7 @@ function onCellEditComplete(event) {
                                 </Column>
                                 <Column field="location" header="Location" style="width: 200px">
                                     <template #body="{ data, field }">
-                                        <Dropdown v-model="data[field]" :options="locations" optionValue="id" optionLabel="name" placeholder="Select a Location" />
+                                        <Dropdown v-model="data[field]" :options="locations" @change="changeLocation(data['id'], data[field])" optionValue="id" optionLabel="name" placeholder="Select a Location" />
                                     </template>
                                 </Column>
                                 <Column header="Delete" bodyStyle="text-align: center; overflow: visible; padding: 0">
