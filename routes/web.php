@@ -44,7 +44,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('inventories/drafts', [InventoryDraftController::class, 'index'])->name('inventory-drafts.index');
     Route::delete('inventory-drafts/{inventory_draft}', [InventoryDraftController::class, 'destroy'])->name('inventory-drafts.destroy');
+
     Route::get('inventories/locations', [LocationController::class, 'index'])->name('locations.index');
+    Route::get('inventories/locations/{location}/edit', [LocationController::class, 'edit'])->name('locations.edit');
+
     Route::post('inventories/create/{inventory_draft}', [InventoryController::class, 'store'])->name('inventories.store');
     Route::resource('inventories', InventoryController::class)->except(['store']);
     Route::get('inventories/create/{inventory_draft}', [InventoryDraftController::class, 'create'])->name('inventory-drafts.create');

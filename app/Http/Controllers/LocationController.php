@@ -69,6 +69,33 @@ class LocationController extends Controller
         );
     }
 
+    public function edit(Location $location)
+    {
+        $locations = auth()->user()->locations;
+
+        $inventoryPartsFiltered = $location->inventories->filter(function ($inventory) {
+            return $inventory->inventory_draft_id === null;
+        });
+
+        $inventoryParts = $inventoryPartsFiltered->map(function ($inventory) {
+            return [
+                'id' => $inventory->id,
+                'name' => $inventory->part->name,
+                'sku' => $inventory->part->sku,
+                'category' => $inventory->part->category->name,
+                'quantity' => $inventory->quantity,
+                'part.source.name' => $inventory->part->source->name,
+                'location' => $inventory->location->id,
+            ];
+        });
+
+        return Inertia::render('Locations/Edit', [
+            'locations' => $locations,
+            'location_id' => $location->id,
+            'parts' => $inventoryParts,
+        ]);
+    }
+
     public function destroy(Location $location)
     {
         if (!$location->inventories->count())

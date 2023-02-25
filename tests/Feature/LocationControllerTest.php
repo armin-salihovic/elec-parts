@@ -115,4 +115,22 @@ class LocationControllerTest extends TestCase
             'name' => $randomName,
         ]);
     }
+
+    public function test_location_edit()
+    {
+        $response = $this
+            ->actingAs($this->user)
+            ->get("/inventories/locations/{$this->locations[0]->id}/edit");
+
+        $inventoryPartsFiltered = $this->locations[0]->inventories->filter(function ($inventory) {
+            return $inventory->inventory_draft_id === null;
+        });
+
+        $response->assertInertia(fn(Assert $page) => $page
+            ->component('Locations/Edit')
+            ->has('locations', $this->user->locations->count())
+            ->has('location_id')
+            ->has('parts', $inventoryPartsFiltered->count())
+        );
+    }
 }

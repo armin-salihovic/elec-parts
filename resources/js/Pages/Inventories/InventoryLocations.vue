@@ -79,6 +79,10 @@ function onDelete(id) {
     router.delete(route('locations.destroy', id));
 }
 
+function onShow(id) {
+    router.visit(route('locations.edit', id));
+}
+
 </script>
 
 <template>
@@ -117,8 +121,7 @@ function onDelete(id) {
                     <Column headerStyle="width: 4rem; text-align: center" bodyStyle="text-align: center; overflow: visible; padding: 0">
                         <template #body="{data}">
                             <div class="flex gap-10">
-<!--                                todo: implement show / edit-->
-<!--                                <CrudButton type="show" @click="onShow(data.id)" />-->
+                                <CrudButton type="show" @click="onShow(data.id)" />
                                 <CrudButton type="delete" @click="onDelete(data.id)" />
                             </div>
                         </template>

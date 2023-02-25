@@ -10,6 +10,7 @@ import PrimeVue from "primevue/config";
 import 'primevue/resources/themes/saga-blue/theme.css';
 import 'primevue/resources/primevue.min.css';
 import 'primeicons/primeicons.css';
+import ConfirmationService from "primevue/confirmationservice";
 
 const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'Laravel';
 
@@ -20,6 +21,7 @@ createInertiaApp({
         return createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(ZiggyVue, Ziggy)
+            .use(ConfirmationService)
             .use(PrimeVue)
             .mount(el);
     },
