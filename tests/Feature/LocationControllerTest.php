@@ -130,6 +130,7 @@ class LocationControllerTest extends TestCase
             ->component('Locations/Edit')
             ->has('locations', $this->user->locations->count())
             ->has('location_id')
+            ->has('location_name')
             ->has('parts', $inventoryPartsFiltered->count())
         );
     }

@@ -92,6 +92,7 @@ class LocationController extends Controller
         return Inertia::render('Locations/Edit', [
             'locations' => $locations,
             'location_id' => $location->id,
+            'location_name' => $location->name,
             'parts' => $inventoryParts,
         ]);
     }

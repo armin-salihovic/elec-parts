@@ -11,6 +11,7 @@ const handleSubmit = () => {
 const props = defineProps({
     locations: Object,
     location_id: Number | String,
+    location_name: String,
     parts: Object,
 })
 
@@ -23,9 +24,9 @@ const props = defineProps({
         <template #header>
             <div class="flex justify-between">
                 <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                    Create Inventory
+                    {{ location_name }}
                 </h2>
-                <Button @click="router.visit(route('inventories.index'))">Back</Button>
+                <Button @click="router.visit(route('locations.index'))">Back</Button>
             </div>
         </template>
 
