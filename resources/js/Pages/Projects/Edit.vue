@@ -7,11 +7,13 @@ import ProjectParts from "@/Pages/Projects/ProjectParts.vue";
 import ProjectDetails from "@/Pages/Projects/ProjectDetails.vue";
 import BreezeAuthenticatedLayout from '@/Layouts/Authenticated.vue';
 import ProjectLayout from "@/Layouts/ProjectLayout.vue";
+import ProjectBuilds from "@/Pages/Projects/ProjectBuilds.vue";
 
 const props = defineProps({
     project_name: String,
     project_details: Object,
     project_parts: Object,
+    project_builds: Object,
 })
 
 const form = ref({
@@ -40,6 +42,7 @@ const submit = () => {
                     <div class="mx-auto sm:px-6 lg:px-8">
                         <ProjectParts :data="project_parts" />
                         <ProjectDetails :data="project_details" />
+                        <ProjectBuilds :data="project_builds" />
                     </div>
                 </div>
             </ProjectLayout>

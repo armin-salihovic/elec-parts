@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Inventory;
 use App\Models\Project;
 use App\Models\ProjectPart;
 use Illuminate\Http\Request;
@@ -62,5 +63,30 @@ class ProjectPartController extends Controller
     function destroy(ProjectPart $projectPart)
     {
         $projectPart->delete();
+    }
+
+    function matchBomToParts(ProjectPart $projectPart)
+    {
+        $searchValues = preg_split('/\s+/', $projectPart->part_name, -1, PREG_SPLIT_NO_EMPTY);
+
+        $inventories = Inventory::where('inventory_draft_id', null);
+
+        foreach($searchValues as $searchTerm){
+            $inventories->whereHas('part', function($relation) use ($searchTerm){
+                    $relation->where('name', 'like', '%'.$searchTerm.'%');
+                });
+        }
+
+        $inventories = $inventories->get();
+
+        return $inventories->map(function ($inventory) {
+            return [
+                'name' => $inventory->part->name,
+                'sku' => $inventory->part->sku,
+                'quantity' => $inventory->quantity,
+                'source' => $inventory->part->source->name,
+                'location' => $inventory->location->name,
+            ];
+        });
     }
 }
