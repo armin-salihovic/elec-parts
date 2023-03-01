@@ -6,6 +6,7 @@ use App\Http\Controllers\InventoryDraftController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\PartController;
 use App\Http\Controllers\ProjectBuildController;
+use App\Http\Controllers\ProjectBuildPartController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectPartController;
 use Illuminate\Foundation\Application;
@@ -61,12 +62,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('projects/{project}/bom', [ProjectPartController::class, 'store'])->name('project-parts.store');
     Route::put('bom/{project_part}', [ProjectPartController::class, 'update'])->name('project-parts.update');
     Route::delete('bom/{project_part}', [ProjectPartController::class, 'destroy'])->name('project-parts.destroy');
-    Route::get('match-bom-to-parts/{project_part}', [ProjectPartController::class, 'matchBomToParts'])->name('match-bom-to-parts');
 
     Route::get('projects/{project}/builds', [ProjectBuildController::class, 'index'])->name('projects.builds.index');
     Route::get('projects/{project}/builds/create', [ProjectBuildController::class, 'create'])->name('projects.builds.create');
     Route::post('projects/{project}/builds', [ProjectBuildController::class, 'store'])->name('projects.builds.store');
     Route::get('projects/{project}/builds/{project_build}', [ProjectBuildController::class, 'show'])->name('projects.builds.show');
+
+    Route::post('projects/{project}/builds/{project_build}/parts/create', [ProjectBuildPartController::class, 'store'])->name('projects.builds.parts.store');
+    Route::get('projects/{project}/builds/{project_build}/parts/{project_part}', [ProjectBuildPartController::class, 'index'])->name('projects.builds.parts.index');
+    Route::delete('projects/{project}/builds/{project_build}/parts/{project_part}/inventory/{inventory}', [ProjectBuildPartController::class, 'delete'])->name('projects.builds.parts.delete');
 
     Route::post('locations', [LocationController::class, 'store'])->name('locations.store');
     Route::put('locations/{location}', [LocationController::class, 'update'])->name('locations.update');

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Inventory extends Model
 {
@@ -30,5 +31,10 @@ class Inventory extends Model
     public function inventoryDraft(): BelongsTo
     {
         return $this->belongsTo(InventoryDraft::class);
+    }
+
+    public function projectBuildParts(): HasMany
+    {
+        return $this->hasMany(ProjectBuildPart::class);
     }
 }

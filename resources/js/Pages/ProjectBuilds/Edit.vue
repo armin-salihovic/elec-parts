@@ -19,16 +19,52 @@ const props = defineProps({
 const expandedRows = ref([]);
 
 function onRowExpand (event) {
-    console.log(event.data)
-
-    axios.get(route('match-bom-to-parts', event.data.id)).then(({data}) => {
-        event.data.matched_parts = data;
-        event.data.matched_parts_loading = false;
-    });
+    loadProjectParts(event.data);
 }
 
 function onRowCollapse (event) {
     console.log(event)
+}
+
+function addInventoryPart(inventory, projectPart) {
+    inventory['selected'] = true;
+
+    const uri = route('projects.builds.parts.store', [route().params.project, route().params.project_build]);
+
+    const data = {
+        inventory_id: inventory['id'],
+        project_part_id: projectPart['id']
+    };
+
+    axios
+        .post(uri, data)
+        .then(({data}) => {
+            console.log('added');
+        }).catch(() => {
+            loadProjectParts();
+        });
+}
+
+function deleteInventoryPart(inventoryId, projectPart) {
+    const uri = route('projects.builds.parts.delete', [
+        route().params.project,
+        route().params.project_build,
+        projectPart['id'],
+        inventoryId
+    ]);
+
+    axios.delete(uri).then(({data}) => {
+        loadProjectParts(projectPart);
+    });
+}
+
+function loadProjectParts(projectPart) {
+    const uri = route('projects.builds.parts.index', [route().params.project, route().params.project_build, projectPart['id']]);
+
+    axios.get(uri).then(({data}) => {
+        projectPart.matched_parts = data;
+        projectPart.matched_parts_loading = false;
+    });
 }
 
 </script>
@@ -111,8 +147,9 @@ function onRowCollapse (event) {
                                                     <div class="w-full text-center">No parts could be matched.</div>
                                                 </template>
                                                 <Column headerStyle="width:2rem">
-                                                    <template #body>
-                                                        <Button>Select</Button>
+                                                    <template #body="{data}">
+                                                        <Button v-if="data['selected']" @click="deleteInventoryPart(data['id'], slotProps.data)">Remove</Button>
+                                                        <Button v-else @click="addInventoryPart(data, slotProps.data)">Select</Button>
                                                     </template>
                                                 </Column>
                                                 <Column field="name" header="Name" />
