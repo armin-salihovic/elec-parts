@@ -34,10 +34,16 @@ class ProjectBuildPartController extends Controller
             'project_part_id' => 'required',
         ]);
 
+        $projectPart = ProjectPart::findOrFail($request->project_part_id);
+
         ProjectBuildPart::create([
             'project_build_id' => $projectBuild->id,
             'project_part_id' => $request->project_part_id,
             'inventory_id' => $request->inventory_id,
+        ]);
+
+        return response()->json([
+            'inventory_quantity' => $projectPart->inventoryQuantity($projectBuild),
         ]);
     }
 
@@ -54,5 +60,9 @@ class ProjectBuildPartController extends Controller
             ->first();
 
         $projectBuildPart->delete();
+
+        return response()->json([
+            'inventory_quantity' => $projectPart->inventoryQuantity($projectBuild),
+        ]);
     }
 }

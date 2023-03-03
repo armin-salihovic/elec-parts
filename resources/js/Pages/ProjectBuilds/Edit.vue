@@ -9,11 +9,16 @@ import ProjectLayout from "@/Layouts/ProjectLayout.vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import axios from "axios";
+import RadioButton from "primevue/radiobutton";
 
 const props = defineProps({
     project_name: String,
     project_parts: Object,
     project_build: Object,
+})
+
+const form = ref({
+    selection_order: 'FIFO',
 })
 
 const expandedRows = ref([]);
@@ -39,9 +44,9 @@ function addInventoryPart(inventory, projectPart) {
     axios
         .post(uri, data)
         .then(({data}) => {
-            console.log('added');
+            projectPart['inventory_quantity'] = data['inventory_quantity'];
         }).catch(() => {
-            loadProjectParts();
+            loadProjectParts(projectPart);
         });
 }
 
@@ -55,7 +60,12 @@ function deleteInventoryPart(inventoryId, projectPart) {
 
     axios.delete(uri).then(({data}) => {
         loadProjectParts(projectPart);
+        projectPart['inventory_quantity'] = data['inventory_quantity'];
     });
+}
+
+function isLoaded(projectPart) {
+    return projectPart['inventory_quantity'] >= projectPart['quantity'] * props.project_build['quantity'];
 }
 
 function loadProjectParts(projectPart) {
@@ -90,11 +100,37 @@ function loadProjectParts(projectPart) {
             <ProjectLayout>
                 <div class="py-12">
                     <div class="mx-auto sm:px-6 lg:px-8">
-                        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                            <div class="p-6 bg-white border-b border-gray-200 w-1/4">
+                        <div class="bg-white shadow-sm sm:rounded-lg">
+                            <div class="p-6 bg-white border-b border-gray-200">
                                 <div class="flex flex-col mb-5">
                                     <div>Quantity: {{ project_build.quantity }}</div>
                                 </div>
+                                <divc class="flex justify-between">
+                                    <div>
+                                        <label>Selection order:</label>
+                                        <div class="flex gap-4 mt-2">
+                                            <div class="flex items-center gap-2">
+                                                <RadioButton inputId="fifo" name="selection_order" value="FIFO" v-model="form['selection_order']" />
+                                                <label for="fifo">FIFO</label>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <RadioButton inputId="lifo" name="selection_order" value="LIFO" v-model="form['selection_order']" />
+                                                <label for="lifo">LIFO</label>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <RadioButton inputId="smallest-stock" name="selection_order" value="smallest stock" v-model="form['selection_order']" />
+                                                <label for="smallest-stock">Smallest stock</label>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <RadioButton inputId="largest-stock" name="selection_order" value="largest stock" v-model="form['selection_order']" />
+                                                <label for="largest-stock">Largest stock</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="self-end">
+                                        <Button>Review</Button>
+                                    </div>
+                                </divc>
                             </div>
                         </div>
                     </div>
@@ -129,6 +165,12 @@ function loadProjectParts(projectPart) {
                                             <InputText v-model="data[field]" placeholder="Quantity" />
                                         </template>
                                     </Column>
+                                    <Column header="Loaded">
+                                        <template #body="{data}">
+                                            <i v-if="isLoaded(data)" class="pi pi-check-circle text-green-600" style="font-size: 1.5rem"></i>
+                                            <i v-else class="pi pi-info-circle text-orange-600" style="font-size: 1.5rem"></i>
+                                        </template>
+                                    </Column>
                                     <Column field="description" header="Description">
                                         <template #editor="{ data, field }">
                                             <InputText v-model="data[field]" placeholder="Description" />
@@ -155,6 +197,13 @@ function loadProjectParts(projectPart) {
                                                 <Column field="name" header="Name" />
                                                 <Column field="sku" header="SKU" />
                                                 <Column field="quantity" header="Quantity" />
+                                                <Column header="Need">
+                                                    <template #body="{data}">
+                                                        <div v-if="!isLoaded(slotProps.data) && !data['selected']">
+                                                            {{ slotProps.data['quantity'] * project_build['quantity'] - slotProps.data['inventory_quantity'] }}
+                                                        </div>
+                                                    </template>
+                                                </Column>
                                                 <Column field="source" header="Source" />
                                                 <Column field="location" header="Location" />
                                             </DataTable>

@@ -44,4 +44,24 @@ class ProjectPart extends Model
         });
     }
 
+    function inventoryQuantity(ProjectBuild $projectBuild)
+    {
+        $inventories = Inventory::where('inventory_draft_id', null)->whereHas('projectBuildParts', function ($q) use ($projectBuild) {
+            $q->where('project_build_id', $projectBuild->id)->where('project_part_id', $this->id);
+        })->get();
+
+        $inventoryQuantity = 0;
+
+        foreach ($inventories as $inventory) {
+            $inventoryQuantity += $inventory->quantity;
+        }
+
+        return $inventoryQuantity;
+    }
+
+    function isLoaded(ProjectBuild $projectBuild)
+    {
+        return $this->inventoryQuantity($projectBuild) >= $this->quantity * $projectBuild->quantity;
+    }
+
 }

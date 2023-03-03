@@ -53,10 +53,11 @@ class ProjectBuildController extends Controller
                 'quantity' => $projectBuild->quantity,
                 'created_at' => $projectBuild->created_at,
             ],
-            'project_parts' => ProjectPart::where('project_id', $project->id)->get()->map(function ($projectPart) {
+            'project_parts' => ProjectPart::where('project_id', $project->id)->get()->map(function ($projectPart) use ($projectBuild) {
                 return [
                     'id' => $projectPart->id,
                     'quantity' => $projectPart->quantity,
+                    'inventory_quantity' => $projectPart->inventoryQuantity($projectBuild),
                     'part_name' => $projectPart->part_name,
                     'description' => $projectPart->description,
                     'designators' => $projectPart->designators,
