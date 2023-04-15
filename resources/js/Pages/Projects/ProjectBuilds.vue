@@ -31,7 +31,7 @@ function onDelete(id) {
 }
 
 function onShow(id) {
-    router.visit(route('projects.builds.show', [route().params.project, id]));
+    router.visit(route('projects.builds.edit', [route().params.project, id]));
 }
 
 </script>

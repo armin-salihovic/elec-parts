@@ -16,8 +16,9 @@ return new class extends Migration
         Schema::create('project_builds', function (Blueprint $table) {
             $table->id();
             $table->foreignId('project_id')->constrained();
-            $table->boolean('completed')->default(false);
             $table->integer('quantity');
+            $table->boolean('completed')->default(false);
+            $table->smallInteger('selection_priority')->default(0);
             $table->timestamps();
         });
     }

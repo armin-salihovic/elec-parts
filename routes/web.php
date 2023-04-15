@@ -66,7 +66,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('projects/{project}/builds', [ProjectBuildController::class, 'index'])->name('projects.builds.index');
     Route::get('projects/{project}/builds/create', [ProjectBuildController::class, 'create'])->name('projects.builds.create');
     Route::post('projects/{project}/builds', [ProjectBuildController::class, 'store'])->name('projects.builds.store');
-    Route::get('projects/{project}/builds/{project_build}', [ProjectBuildController::class, 'show'])->name('projects.builds.show');
+    Route::get('projects/{project}/builds/{project_build}', [ProjectBuildController::class, 'edit'])->name('projects.builds.edit');
+    Route::get('projects/{project}/builds/{project_build}/review', [ProjectBuildController::class, 'show'])->name('projects.builds.show');
+    Route::post('projects/{project}/builds/{project_build}', [ProjectBuildController::class, 'build'])->name('projects.builds.build');
+    Route::post('projects/{project}/builds/{project_build}/undo', [ProjectBuildController::class, 'undoBuild'])->name('projects.builds.undo-build');
+    Route::put('update-build-selection-priority/{project_build}', [ProjectBuildController::class, 'updateBuildSelectionPriority'])->name('projects.builds.update-priority');
 
     Route::post('projects/{project}/builds/{project_build}/parts/create', [ProjectBuildPartController::class, 'store'])->name('projects.builds.parts.store');
     Route::get('projects/{project}/builds/{project_build}/parts/{project_part}', [ProjectBuildPartController::class, 'index'])->name('projects.builds.parts.index');

@@ -17,6 +17,10 @@ const props = defineProps({
     project_build: Object,
 })
 
+const form = ref({
+    selection_order: 'FIFO',
+})
+
 const expandedRows = ref([]);
 
 function onRowExpand (event) {
@@ -27,39 +31,6 @@ function onRowCollapse (event) {
     console.log(event)
 }
 
-function addInventoryPart(inventory, projectPart) {
-    inventory['selected'] = true;
-
-    const uri = route('projects.builds.parts.store', [route().params.project, route().params.project_build]);
-
-    const data = {
-        inventory_id: inventory['id'],
-        project_part_id: projectPart['id']
-    };
-
-    axios
-        .post(uri, data)
-        .then(({data}) => {
-            projectPart['inventory_quantity'] = data['inventory_quantity'];
-        }).catch(() => {
-            loadProjectParts(projectPart);
-        });
-}
-
-function deleteInventoryPart(inventoryId, projectPart) {
-    const uri = route('projects.builds.parts.delete', [
-        route().params.project,
-        route().params.project_build,
-        projectPart['id'],
-        inventoryId
-    ]);
-
-    axios.delete(uri).then(({data}) => {
-        loadProjectParts(projectPart);
-        projectPart['inventory_quantity'] = data['inventory_quantity'];
-    });
-}
-
 function isLoaded(projectPart) {
     return projectPart['inventory_quantity'] >= projectPart['quantity'] * props.project_build['quantity'];
 }
@@ -68,20 +39,8 @@ function loadProjectParts(projectPart) {
     const uri = route('projects.builds.parts.index', [route().params.project, route().params.project_build, projectPart['id']]);
 
     axios.get(uri).then(({data}) => {
-        projectPart.matched_parts = data;
+        projectPart.matched_parts = data.filter((projectPart) => projectPart['selected'] === true);
         projectPart.matched_parts_loading = false;
-    });
-}
-
-function handleSelectionOrderChange() {
-    const uri = route('projects.builds.update-priority', route().params.project_build);
-
-    const data = {
-        selection_priority: props.project_build['selection_priority'],
-    }
-
-    axios.put(uri, data).then(() => {
-        router.reload({ only: ['project_build'] })
     });
 }
 
@@ -118,25 +77,26 @@ function handleSelectionOrderChange() {
                                         <label>Selection order:</label>
                                         <div class="flex gap-4 mt-2">
                                             <div class="flex items-center gap-2">
-                                                <RadioButton inputId="fifo" name="selection_order" @change="handleSelectionOrderChange" :value="0" v-model="project_build['selection_priority']" />
+                                                <RadioButton inputId="fifo" name="selection_order" :value="0" v-model="project_build['selection_priority']" disabled />
                                                 <label for="fifo">FIFO</label>
                                             </div>
                                             <div class="flex items-center gap-2">
-                                                <RadioButton inputId="lifo" name="selection_order" @change="handleSelectionOrderChange" :value="1" v-model="project_build['selection_priority']" />
+                                                <RadioButton inputId="lifo" name="selection_order" :value="1" v-model="project_build['selection_priority']" disabled />
                                                 <label for="lifo">LIFO</label>
                                             </div>
                                             <div class="flex items-center gap-2">
-                                                <RadioButton inputId="smallest-stock" name="selection_order" @change="handleSelectionOrderChange" :value="2" v-model="project_build['selection_priority']" />
+                                                <RadioButton inputId="smallest-stock" name="selection_order" :value="2" v-model="project_build['selection_priority']" disabled />
                                                 <label for="smallest-stock">Smallest stock</label>
                                             </div>
                                             <div class="flex items-center gap-2">
-                                                <RadioButton inputId="largest-stock" name="selection_order" @change="handleSelectionOrderChange" :value="3" v-model="project_build['selection_priority']" />
+                                                <RadioButton inputId="largest-stock" name="selection_order" :value="3" v-model="project_build['selection_priority']" disabled />
                                                 <label for="largest-stock">Largest stock</label>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="self-end">
-                                        <Button @click="router.visit(route('projects.builds.show', [route().params.project, route().params.project_build]))">Review</Button>
+                                        <Button v-if="!project_build['completed']" @click="router.post(route('projects.builds.build', [route().params.project, route().params.project_build]))">Build</Button>
+                                        <Button v-else @click="router.post(route('projects.builds.undo-build', [route().params.project, route().params.project_build]))">Undo Build</Button>
                                     </div>
                                 </div>
                             </div>
@@ -147,7 +107,7 @@ function handleSelectionOrderChange() {
                     <div class="mx-auto sm:px-6 lg:px-8">
                         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                             <div class="p-6 bg-white border-b border-gray-200">
-                                <h2 class="text-lg mb-3">Bill of Materials (BOM)</h2>
+                                <h2 class="text-lg mb-3">Review Project Build BOM</h2>
                                 <DataTable
                                     :value="project_parts"
                                     :autoLayout="true"
@@ -191,27 +151,27 @@ function handleSelectionOrderChange() {
                                     </Column>
                                     <template #expansion="slotProps">
                                         <div class="w-full p-4">
-                                            <h3 class="text-base mb-3">Matching parts for <span class="font-bold">{{slotProps.data.part_name}}</span></h3>
+                                            <h3 class="text-base mb-3">Selected parts for <span class="font-bold">{{slotProps.data.part_name}}</span></h3>
                                             <DataTable :value="slotProps.data.matched_parts" :autoLayout="true" tableStyle="width:auto" responsiveLayout="scroll" :loading="slotProps.data.matched_parts_loading">
                                                 <template #empty>
                                                     <div class="w-full text-center">No parts could be matched.</div>
                                                 </template>
-                                                <Column headerStyle="width:2rem">
-                                                    <template #body="{data}">
-                                                        <Button v-if="data['selected']" @click="deleteInventoryPart(data['id'], slotProps.data)">Remove</Button>
-                                                        <Button v-else @click="addInventoryPart(data, slotProps.data)">Select</Button>
-                                                    </template>
-                                                </Column>
+<!--                                                <Column headerStyle="width:2rem">-->
+<!--                                                    <template #body="{data}">-->
+<!--                                                        <Button v-if="data['selected']" @click="deleteInventoryPart(data['id'], slotProps.data)">Remove</Button>-->
+<!--                                                        <Button v-else @click="addInventoryPart(data, slotProps.data)">Select</Button>-->
+<!--                                                    </template>-->
+<!--                                                </Column>-->
                                                 <Column field="name" header="Name" />
                                                 <Column field="sku" header="SKU" />
                                                 <Column field="quantity" header="Quantity" />
-                                                <Column header="Need">
-                                                    <template #body="{data}">
-                                                        <div v-if="!isLoaded(slotProps.data) && !data['selected']">
-                                                            {{ slotProps.data['quantity'] * project_build['quantity'] - slotProps.data['inventory_quantity'] }}
-                                                        </div>
-                                                    </template>
-                                                </Column>
+<!--                                                <Column header="Need">-->
+<!--                                                    <template #body="{data}">-->
+<!--                                                        <div v-if="!isLoaded(slotProps.data) && !data['selected']">-->
+<!--                                                            {{ slotProps.data['quantity'] * project_build['quantity'] - slotProps.data['inventory_quantity'] }}-->
+<!--                                                        </div>-->
+<!--                                                    </template>-->
+<!--                                                </Column>-->
                                                 <Column field="source" header="Source" />
                                                 <Column field="location" header="Location" />
                                             </DataTable>

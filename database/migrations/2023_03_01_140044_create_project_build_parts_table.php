@@ -18,6 +18,9 @@ return new class extends Migration
             $table->foreignId('project_build_id')->constrained();
             $table->foreignId('project_part_id')->constrained();
             $table->foreignId('inventory_id')->constrained();
+            $table->boolean('used')->default(false);
+            $table->integer('quantity')->default(0);
+
             $table->unique(['project_build_id', 'project_part_id', 'inventory_id'], 'pb_pp_inv_unique');
             $table->timestamps();
         });

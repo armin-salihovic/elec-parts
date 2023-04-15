@@ -5,11 +5,19 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use App\Models\ProjectBuild;
 use App\Models\ProjectPart;
+use App\Services\ProjectBuildService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class ProjectBuildController extends Controller
 {
+    private $projectBuildService;
+
+    public function __construct(ProjectBuildService $projectBuildService)
+    {
+        $this->projectBuildService = $projectBuildService;
+    }
+
     public function index(Project $project)
     {
         return Inertia::render('Projects/Edit', [
@@ -18,6 +26,7 @@ class ProjectBuildController extends Controller
                 return [
                     'id' => $projectBuild->id,
                     'quantity' => $projectBuild->quantity,
+                    'completed' => $projectBuild->completed,
                     'created_at' => date('M. d, Y', strtotime($projectBuild->created_at)),
                 ];
             }),
@@ -42,15 +51,20 @@ class ProjectBuildController extends Controller
             'project_id' => $project->id,
         ]);
 
-        return to_route('projects.builds.show', [$project->id, $projectBuild->id]);
+        return to_route('projects.builds.edit', [$project->id, $projectBuild->id]);
     }
 
-    public function show(Project $project, ProjectBuild $projectBuild)
+    public function edit(Project $project, ProjectBuild $projectBuild)
     {
+        if ($projectBuild->completed) {
+            return to_route('projects.builds.show', [$project->id, $projectBuild->id]);
+        }
+
         return Inertia::render('ProjectBuilds/Edit', [
             'project_name' => $project->name,
             'project_build' => [
                 'quantity' => $projectBuild->quantity,
+                'selection_priority' => $projectBuild->selection_priority,
                 'created_at' => $projectBuild->created_at,
             ],
             'project_parts' => ProjectPart::where('project_id', $project->id)->get()->map(function ($projectPart) use ($projectBuild) {
@@ -66,5 +80,57 @@ class ProjectBuildController extends Controller
                 ];
             })
         ]);
+    }
+
+    public function show(Project $project, ProjectBuild $projectBuild)
+    {
+        return Inertia::render('ProjectBuilds/Show', [
+            'project_name' => $project->name,
+            'project_build' => [
+                'quantity' => $projectBuild->quantity,
+                'completed' => $projectBuild->completed,
+                'selection_priority' => $projectBuild->selection_priority,
+                'created_at' => $projectBuild->created_at,
+            ],
+            'project_parts' => ProjectPart::where('project_id', $project->id)->get()->map(function ($projectPart) use ($projectBuild) {
+                return [
+                    'id' => $projectPart->id,
+                    'quantity' => $projectPart->quantity,
+                    'inventory_quantity' => $projectPart->inventoryQuantity($projectBuild),
+                    'part_name' => $projectPart->part_name,
+                    'description' => $projectPart->description,
+                    'designators' => $projectPart->designators,
+                    'matched_parts' => [],
+                    'matched_parts_loading' => true,
+                ];
+            })
+        ]);
+    }
+
+    public function build(Project $project, ProjectBuild $projectBuild)
+    {
+        if ($projectBuild->completed) {
+            return to_route('projects.builds.show', [$project->id, $projectBuild->id]);
+        }
+
+        $this->projectBuildService->buildProject($project, $projectBuild);
+
+        return to_route('projects.builds.index', [$project->id, $projectBuild->id]);
+    }
+
+    public function undoBuild(Project $project, ProjectBuild $projectBuild)
+    {
+        $this->projectBuildService->undoProjectBuild($projectBuild);
+
+        return to_route('projects.builds.index', [$project->id, $projectBuild->id]);
+    }
+
+    public function updateBuildSelectionPriority(ProjectBuild $projectBuild, Request $request)
+    {
+        $request->validate([
+            'selection_priority' => 'required | integer | between:0,3'
+        ]);
+
+        $projectBuild->update(['selection_priority' => $request->input('selection_priority')]);
     }
 }
