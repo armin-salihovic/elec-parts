@@ -1,64 +1,21 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+<p align="center"><a href="https://elecpart.notion.site/983f66468db34da1be4d7f3b897d0307?v=96b9f0a5cd9340eab15042c273ba8ab6" target="_blank"><img src="https://uc5ae5d3694392ffa8b8fd9ae83a.previews.dropboxusercontent.com/p/thumb/AB0fIoeO1PHliO_ANStmuLd7LF8Taky4Bhp_2y08McljyV7qoTkcUL-6E9WLGFeeqnV7O-PSONSl0NzkBLJL0ccAlzP3GtbyuUXjy4K4b_3-ZXpyNAR1lop9NUm9-RS5uCbK6T1fJIJ2mBzsWVCxqDigW9KZey_MPfB3MbMFl9C-3k_orGAYOGPQHbytGCINHEmBmIdiCtfTPkB4_hD0I3xbsaIB_1EZ8KW5bsvZHO3U57N9u7-_grH4P56OZ5YX6b50ZknMw9q8wR6FZNJtwKtajgr7xoWDRmMyuoznInR8vqYPDtdtUaqG3rCfYywhFEUJAYYEJMC0aG-GkIVXiRZuGAcSCoDptU1-DUL060AtIA2vKNaMTABJZATVez7XTNbDK7tKC2iOOA50xqFMMj859obOfs9eDvTU6cI0LoDZ6g/p.png" width="300"></a></p>
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## About EleParts
 
-## About Laravel
+EleParts is an electronic parts & projects management system designed to be used as a web application. Inspiration comes from building electronics projects, specifically, guitar pedals, and not being able to keep track of the parts used and the number of projects created. 
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Some of the currently available features include:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- Managing of local and distributor parts
+- Managing of inventory by location
+- Importing of [Tayda Electronics](https://www.taydaelectronics.com/) products
+- Creating projects
+- Starting project builds
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-## Laravel Sponsors
-
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
-
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+The most recent documentation can be read on [Notion](https://elecpart.notion.site/983f66468db34da1be4d7f3b897d0307?v=96b9f0a5cd9340eab15042c273ba8ab6).
 
 ## Contributing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+I’d love to hear ideas from the community and make this application work for everyone.
 
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+If you like the project and would like to contribute in any way please reach out to me via [hello@armin.ba](mailto:hello@armin.ba).
