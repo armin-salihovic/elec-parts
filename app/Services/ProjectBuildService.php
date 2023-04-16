@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\PriorityType;
 use App\Models\Project;
 use App\Models\ProjectBuild;
+use App\Models\ProjectPart;
 
 class ProjectBuildService
 {
@@ -63,7 +64,41 @@ class ProjectBuildService
         }
     }
 
-    private function sortProjectBuildPartsByPriority(ProjectBuild $projectBuild, $projectBuildParts)
+    // todo: refactor $this->updateInventories(...
+    public function getProjectBuildPartsDraft(ProjectBuild $projectBuild, ProjectPart $projectPart)
+    {
+        $projectBuildParts = $projectBuild->parts->where('project_part_id', $projectPart->id);
+
+        $projectBuildParts = $this->sortProjectBuildPartsByPriority($projectBuild, $projectBuildParts);
+
+        $need = $projectPart->quantity * $projectBuild->quantity;
+
+        foreach ($projectBuildParts as $projectBuildPart) {
+
+            $inventoryPart = $projectBuildPart->inventory;
+
+            if ($inventoryPart->quantity >= $need) {
+                $inventoryPart->quantity -= $need;
+                $projectBuildPart->quantity = $need;
+                $need = 0;
+            } else {
+                $projectBuildPart->quantity = $inventoryPart->quantity;
+                $need -= $inventoryPart->quantity;
+                $inventoryPart->quantity = 0;
+            }
+            $projectBuildPart->used = true;
+
+//            $inventoryPart->save();
+//            $projectBuildPart->save();
+
+            if ($need === 0) break;
+        }
+
+        return $projectBuildParts->where('used', true);
+    }
+
+
+    public function sortProjectBuildPartsByPriority(ProjectBuild $projectBuild, $projectBuildParts)
     {
         switch ($projectBuild->selection_priority) {
             case PriorityType::FIFO:

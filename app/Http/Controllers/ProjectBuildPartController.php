@@ -7,10 +7,18 @@ use App\Models\Project;
 use App\Models\ProjectBuild;
 use App\Models\ProjectBuildPart;
 use App\Models\ProjectPart;
+use App\Services\ProjectBuildService;
 use Illuminate\Http\Request;
 
 class ProjectBuildPartController extends Controller
 {
+    private $projectBuildService;
+
+    public function __construct(ProjectBuildService $projectBuildService)
+    {
+        $this->projectBuildService = $projectBuildService;
+    }
+
     public function index (Project $project, ProjectBuild $projectBuild, ProjectPart $projectPart)
     {
         $inventories = Inventory::where('inventory_draft_id', null)->whereHas('projectBuildParts', function ($q) use ($projectBuild, $projectPart) {
@@ -25,6 +33,26 @@ class ProjectBuildPartController extends Controller
         }
 
         return $projectBuildParts;
+    }
+
+    public function getProjectBuildPartsDraft(Project $project, ProjectBuild $projectBuild, ProjectPart $projectPart)
+    {
+        if($projectBuild->completed) {
+            $projectBuildParts = $projectBuild->parts->where('project_part_id', $projectPart->id)->where('used', true);
+        } else {
+            $projectBuildParts = $this->projectBuildService->getProjectBuildPartsDraft($projectBuild, $projectPart);
+        }
+
+        return $projectBuildParts->map(function ($projectBuildPart) {
+            return [
+                'id' => $projectBuildPart->inventory->id,
+                'name' => $projectBuildPart->inventory->part->name,
+                'sku' => $projectBuildPart->inventory->part->sku,
+                'quantity' => $projectBuildPart->quantity,
+                'source' => $projectBuildPart->inventory->part->source->name,
+                'location' => $projectBuildPart->inventory->location->name,
+            ];
+        });
     }
 
     public function store (Project $project, ProjectBuild $projectBuild, Request $request)

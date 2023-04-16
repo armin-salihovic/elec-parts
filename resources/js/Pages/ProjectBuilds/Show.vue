@@ -36,10 +36,10 @@ function isLoaded(projectPart) {
 }
 
 function loadProjectParts(projectPart) {
-    const uri = route('projects.builds.parts.index', [route().params.project, route().params.project_build, projectPart['id']]);
+    const uri = route('projects.builds.parts.draft', [route().params.project, route().params.project_build, projectPart['id']]);
 
     axios.get(uri).then(({data}) => {
-        projectPart.matched_parts = data.filter((projectPart) => projectPart['selected'] === true);
+        projectPart.matched_parts = data;
         projectPart.matched_parts_loading = false;
     });
 }
@@ -156,22 +156,9 @@ function loadProjectParts(projectPart) {
                                                 <template #empty>
                                                     <div class="w-full text-center">No parts could be matched.</div>
                                                 </template>
-<!--                                                <Column headerStyle="width:2rem">-->
-<!--                                                    <template #body="{data}">-->
-<!--                                                        <Button v-if="data['selected']" @click="deleteInventoryPart(data['id'], slotProps.data)">Remove</Button>-->
-<!--                                                        <Button v-else @click="addInventoryPart(data, slotProps.data)">Select</Button>-->
-<!--                                                    </template>-->
-<!--                                                </Column>-->
                                                 <Column field="name" header="Name" />
                                                 <Column field="sku" header="SKU" />
                                                 <Column field="quantity" header="Quantity" />
-<!--                                                <Column header="Need">-->
-<!--                                                    <template #body="{data}">-->
-<!--                                                        <div v-if="!isLoaded(slotProps.data) && !data['selected']">-->
-<!--                                                            {{ slotProps.data['quantity'] * project_build['quantity'] - slotProps.data['inventory_quantity'] }}-->
-<!--                                                        </div>-->
-<!--                                                    </template>-->
-<!--                                                </Column>-->
                                                 <Column field="source" header="Source" />
                                                 <Column field="location" header="Location" />
                                             </DataTable>
