@@ -128,4 +128,9 @@ const showingNavigationDropdown = ref(false);
     font-size: 13px;
     font-family: "Roboto", sans-serif;
 }
+
+.p-toast .p-toast-message-content {
+    border-style: unset !important;
+
+}
 </style>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Project;
 use App\Models\ProjectPart;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -61,6 +62,13 @@ class ProjectPartController extends Controller
 
     function destroy(ProjectPart $projectPart)
     {
-        $projectPart->delete();
+        try {
+            $projectPart->delete();
+        } catch (QueryException $e) {
+            return redirect()->back()->withErrors(
+                ['message' => 'This part is already used in a build.']
+            );
+        }
+        return to_route('project-parts.index', $projectPart->project->id);
     }
 }

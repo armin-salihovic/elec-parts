@@ -7,6 +7,10 @@ import {ref} from "vue";
 import {router} from "@inertiajs/vue3";
 import CrudButton from "@/Components/CrudButton.vue";
 import AFormCard from "@/Components/AFormCard.vue";
+import {useToast} from "primevue/usetoast";
+import Toast from "primevue/toast";
+
+const toast = useToast();
 
 const projectPart = ref({
     quantity: '',
@@ -22,7 +26,9 @@ const props = defineProps({
 })
 
 function addProjectPart() {
-    router.post(route('project-parts.store', route().params.project), projectPart.value);
+    router.post(route('project-parts.store', route().params.project), projectPart.value, {
+        preserveScroll: true,
+    });
 }
 
 function onRowEditSave(event) {
@@ -38,7 +44,15 @@ function onRowEditSave(event) {
 }
 
 function onDelete(id) {
-    router.delete(route('project-parts.destroy', id));
+    router.delete(route('project-parts.destroy', id), {
+        preserveScroll: true,
+        onSuccess: () => {
+            toast.add({ severity: 'success', summary: 'Success', detail: 'Part deleted.', life: 3000 });
+        },
+        onError: (data) => {
+            toast.add({ severity: 'error', summary: 'Error', detail: data.message, life: 3000 });
+        }
+    });
 }
 
 </script>
@@ -50,6 +64,7 @@ function onDelete(id) {
 </style>
 
 <template>
+    <Toast/>
     <div v-if="data">
         <AFormCard title="Add new part" :collapsible="true" class="mb-5">
             <div class="flex gap-5">
@@ -109,9 +124,8 @@ function onDelete(id) {
                         <InputText v-model="data[field]" placeholder="Designators" />
                     </template>
                 </Column>
-                <Column :rowEditor="true" style="width:10%; min-width:8rem" bodyStyle="text-align:center; padding: 0" />
-
-                <Column headerStyle="width: 4rem; text-align: center" bodyStyle="text-align: center; overflow: visible; padding: 0">
+                <Column :rowEditor="true" bodyStyle="padding: 0; display: flex; justify-content: end;" />
+                <Column bodyStyle="overflow: visible; padding: 0">
                     <template #body="{data}">
                         <CrudButton type="delete" @click="onDelete(data.id)" />
                     </template>
