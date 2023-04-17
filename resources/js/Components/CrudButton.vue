@@ -9,6 +9,9 @@
         <Button v-if="type === 'show'" icon="pi pi-eye" class="p-button-rounded p-button-text custom-size">
             <i class="pi pi-eye"></i>
         </Button>
+        <Button v-if="type === 'continue'" icon="pi pi-arrow-right" class="p-button-rounded p-button-text custom-size">
+            <i class="pi pi-arrow-right"></i>
+        </Button>
         <Button @click="handleLinkClick" v-if="type === 'link'" icon="pi pi-link" class="p-button-rounded p-button-secondary p-button-text custom-size">
             <i class="pi pi-link"></i>
         </Button>

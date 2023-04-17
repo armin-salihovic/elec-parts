@@ -7,6 +7,13 @@ import {ref} from "vue";
 import {router} from "@inertiajs/vue3";
 import CrudButton from "@/Components/CrudButton.vue";
 import AFormCard from "@/Components/AFormCard.vue";
+import {useToast} from "primevue/usetoast";
+import Toast from "primevue/toast";
+import ConfirmDialog from "primevue/confirmdialog";
+import {useConfirm} from "primevue/useconfirm";
+
+const toast = useToast();
+const confirm = useConfirm();
 
 const editingRows= ref([]);
 
@@ -27,7 +34,23 @@ function onRowEditSave(event) {
 }
 
 function onDelete(id) {
-    router.delete(route('project-parts.destroy', id));
+
+    confirm.require({
+        message: 'This build is already finished. Deleting it will restock all the used parts. Are you sure you want to continue?',
+        header: 'Confirmation',
+        icon: 'pi pi-exclamation-triangle',
+        accept: () => {
+            router.delete(route('project-builds.destroy', id), {
+                preserveScroll: true,
+                onSuccess: () => {
+                    toast.add({ severity: 'success', summary: 'Success', detail: 'Build deleted.', life: 3000 });
+                },
+                onError: () => {
+                    toast.add({ severity: 'error', summary: 'Error', detail: 'Unexpected error occurred', life: 3000 });
+                }
+            });
+        },
+    });
 }
 
 function onShow(id) {
@@ -44,6 +67,8 @@ function onShow(id) {
 
 <template>
     <div v-if="data">
+        <Toast />
+        <ConfirmDialog />
         <AFormCard>
             <Button class="mb-4" @click="router.visit(route('projects.builds.create', route().params.project))">Start a build</Button>
             <DataTable
@@ -74,8 +99,9 @@ function onShow(id) {
 
                 <Column headerStyle="width: 4rem; text-align: center" bodyStyle="text-align: center; overflow: visible; padding: 0">
                     <template #body="{data}">
+                        <CrudButton v-if="data['completed']" type="show" @click="onShow(data.id)" />
+                        <CrudButton v-else type="continue" @click="onShow(data.id)" />
                         <CrudButton type="delete" @click="onDelete(data.id)" />
-                        <CrudButton type="show" @click="onShow(data.id)" />
                     </template>
                 </Column>
             </DataTable>

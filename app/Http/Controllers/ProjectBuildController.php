@@ -133,4 +133,19 @@ class ProjectBuildController extends Controller
 
         $projectBuild->update(['selection_priority' => $request->input('selection_priority')]);
     }
+
+    public function destroy(ProjectBuild $projectBuild)
+    {
+        if($projectBuild->completed) {
+            $this->projectBuildService->undoProjectBuild($projectBuild);
+        }
+
+        foreach ($projectBuild->parts as $part) {
+            $part->delete();
+        }
+
+        $projectBuild->delete();
+
+        return to_route('projects.builds.index', $projectBuild->project_id);
+    }
 }

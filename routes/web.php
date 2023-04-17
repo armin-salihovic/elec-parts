@@ -71,6 +71,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('projects/{project}/builds/{project_build}', [ProjectBuildController::class, 'build'])->name('projects.builds.build');
     Route::post('projects/{project}/builds/{project_build}/undo', [ProjectBuildController::class, 'undoBuild'])->name('projects.builds.undo-build');
     Route::put('update-build-selection-priority/{project_build}', [ProjectBuildController::class, 'updateBuildSelectionPriority'])->name('projects.builds.update-priority');
+    Route::delete('project-builds/{project_build}', [ProjectBuildController::class, 'destroy'])->name('project-builds.destroy');
 
     Route::post('projects/{project}/builds/{project_build}/parts/create', [ProjectBuildPartController::class, 'store'])->name('projects.builds.parts.store');
     Route::get('projects/{project}/builds/{project_build}/parts/{project_part}', [ProjectBuildPartController::class, 'index'])->name('projects.builds.parts.index');

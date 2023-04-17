@@ -64,8 +64,8 @@ function onDelete(id) {
 </style>
 
 <template>
-    <Toast/>
     <div v-if="data">
+        <Toast/>
         <AFormCard title="Add new part" :collapsible="true" class="mb-5">
             <div class="flex gap-5">
                 <div class="field">
