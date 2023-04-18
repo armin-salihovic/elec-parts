@@ -96,6 +96,12 @@ class LocationController extends Controller
 
     public function destroy(Location $location)
     {
+        if ($location->inventories->contains('inventory_draft_id', null)) {
+            return to_route('locations.index')->withErrors([
+                'message' => 'Location contains parts in inventories.',
+            ]);
+        }
+
         foreach ($location->inventoryDrafts as $inventoryDraft) {
             if ($inventoryDraft->inventories->count() > 0) {
                 return to_route('locations.index')->withErrors([
@@ -104,12 +110,6 @@ class LocationController extends Controller
             } else {
                 $inventoryDraft->delete();
             }
-        }
-
-        if ($location->inventories->contains('inventory_draft_id', null)) {
-            return to_route('locations.index')->withErrors([
-                'message' => 'Location contains parts in inventories.',
-            ]);
         }
 
         $location->delete();

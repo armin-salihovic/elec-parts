@@ -42,11 +42,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('parts', PartController::class);
     Route::resource('projects', ProjectController::class);
     Route::put('projects/{project}/description', [ProjectController::class, 'updateDescription'])->name('projects-description.update');
-    Route::post('sku-part', [InventoryController::class, 'addBySKU'])->name('sku-part');
-
-    Route::get('inventories/drafts', [InventoryDraftController::class, 'index'])->name('inventory-drafts.index');
-    Route::delete('inventory-drafts/{inventory_draft}', [InventoryDraftController::class, 'destroy'])->name('inventory-drafts.destroy');
-
+    Route::post('tayda-pdf-to-products', [PartController::class, 'pdfToProducts'])->name('tayda-pdf-to-products');
 
     Route::controller(LocationController::class)->group(function () {
         Route::post('locations', 'store')->name('locations.store');
@@ -57,19 +53,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('inventories/locations/{location}/edit', 'edit')->name('locations.edit');
     });
 
+    Route::post('sku-part', [InventoryController::class, 'addBySKU'])->name('sku-part');
+    Route::get('inventories/drafts', [InventoryDraftController::class, 'index'])->name('inventory-drafts.index');
     Route::post('inventories/create/{inventory_draft}', [InventoryController::class, 'store'])->name('inventories.store');
     Route::resource('inventories', InventoryController::class)->except(['store']);
     Route::get('inventories/create/{inventory_draft}', [InventoryDraftController::class, 'create'])->name('inventory-drafts.create');
     Route::put('inventories/{inventory}/location', [InventoryController::class, 'updateLocation'])->name('inventories.location.update');
     Route::post('inventory-drafts/{location}', [InventoryDraftController::class, 'store'])->name('inventory-drafts.store');
+    Route::delete('inventory-drafts/{inventory_draft}', [InventoryDraftController::class, 'destroy'])->name('inventory-drafts.destroy');
 
-    Route::post('tayda-pdf-to-products', [PartController::class, 'pdfToProducts'])->name('tayda-pdf-to-products');
-
-    Route::get('projects/{project}/bom', [ProjectPartController::class, 'index'])->name('project-parts.index');
-    Route::post('projects/{project}/bom', [ProjectPartController::class, 'store'])->name('project-parts.store');
-    Route::put('bom/{project_part}', [ProjectPartController::class, 'update'])->name('project-parts.update');
-    Route::delete('bom/{project_part}', [ProjectPartController::class, 'destroy'])->name('project-parts.destroy');
-
+    Route::controller(ProjectPartController::class)->group(function () {
+        Route::get('projects/{project}/bom', 'index')->name('project-parts.index');
+        Route::post('projects/{project}/bom', 'store')->name('project-parts.store');
+        Route::put('bom/{project_part}', 'update')->name('project-parts.update');
+        Route::delete('bom/{project_part}', 'destroy')->name('project-parts.destroy');
+    });
 
     Route::controller(ProjectBuildController::class)->group(function () {
         Route::prefix('projects/{project}/builds')->group(function () {
@@ -96,7 +94,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::delete('/{project_part}/inventory/{inventory}', 'destroy')->name('project-build-parts.destroy');
         });
     });
-
 
 });
 

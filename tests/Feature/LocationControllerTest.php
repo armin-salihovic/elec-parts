@@ -74,9 +74,7 @@ class LocationControllerTest extends TestCase
     {
         $response = $this->actingAs($this->user)->get('/inventories/locations');
 
-        $locations = $this->user->locations()->whereHas('inventories', function ($query) {
-            $query->where('inventory_draft_id', null);
-        })->get();
+        $locations = $this->user->locations()->get();
 
         $inventoryDraft = InventoryDraft::factory()->for($this->user)->for($this->locations[0])->create();
 
