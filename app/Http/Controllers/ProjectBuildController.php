@@ -51,13 +51,13 @@ class ProjectBuildController extends Controller
             'project_id' => $project->id,
         ]);
 
-        return to_route('projects.builds.edit', [$project->id, $projectBuild->id]);
+        return to_route('project-builds.edit', [$project->id, $projectBuild->id]);
     }
 
     public function edit(Project $project, ProjectBuild $projectBuild)
     {
         if ($projectBuild->completed) {
-            return to_route('projects.builds.show', [$project->id, $projectBuild->id]);
+            return to_route('project-builds.show', [$project->id, $projectBuild->id]);
         }
 
         return Inertia::render('ProjectBuilds/Edit', [
@@ -107,22 +107,22 @@ class ProjectBuildController extends Controller
         ]);
     }
 
-    public function build(Project $project, ProjectBuild $projectBuild)
+    public function build(ProjectBuild $projectBuild)
     {
         if ($projectBuild->completed) {
-            return to_route('projects.builds.show', [$project->id, $projectBuild->id]);
+            return to_route('project-builds.show', [$projectBuild->project_id, $projectBuild->id]);
         }
 
-        $this->projectBuildService->buildProject($project, $projectBuild);
+        $this->projectBuildService->buildProject($projectBuild);
 
-        return to_route('projects.builds.index', [$project->id, $projectBuild->id]);
+        return to_route('project-builds.index', $projectBuild->project_id);
     }
 
-    public function undoBuild(Project $project, ProjectBuild $projectBuild)
+    public function undoBuild(ProjectBuild $projectBuild)
     {
         $this->projectBuildService->undoProjectBuild($projectBuild);
 
-        return to_route('projects.builds.index', [$project->id, $projectBuild->id]);
+        return to_route('project-builds.index', $projectBuild->project_id);
     }
 
     public function updateBuildSelectionPriority(ProjectBuild $projectBuild, Request $request)
@@ -146,6 +146,6 @@ class ProjectBuildController extends Controller
 
         $projectBuild->delete();
 
-        return to_route('projects.builds.index', $projectBuild->project_id);
+        return to_route('project-builds.index', $projectBuild->project_id);
     }
 }

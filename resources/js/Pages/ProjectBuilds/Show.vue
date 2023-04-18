@@ -95,8 +95,8 @@ function loadProjectParts(projectPart) {
                                         </div>
                                     </div>
                                     <div class="self-end">
-                                        <Button v-if="!project_build['completed']" @click="router.post(route('projects.builds.build', [route().params.project, route().params.project_build]))">Build</Button>
-                                        <Button v-else @click="router.post(route('projects.builds.undo-build', [route().params.project, route().params.project_build]))">Undo Build</Button>
+                                        <Button v-if="!project_build['completed']" @click="router.post(route('project-builds.build', route().params.project_build))">Build</Button>
+                                        <Button v-else @click="router.post(route('project-builds.undo', route().params.project_build))">Undo Build</Button>
                                     </div>
                                 </div>
                             </div>

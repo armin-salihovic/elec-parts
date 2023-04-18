@@ -3,15 +3,14 @@
 namespace App\Services;
 
 use App\Enums\PriorityType;
-use App\Models\Project;
 use App\Models\ProjectBuild;
 use App\Models\ProjectPart;
 
 class ProjectBuildService
 {
-    public function buildProject(Project $project, ProjectBuild $projectBuild): void
+    public function buildProject(ProjectBuild $projectBuild): void
     {
-        foreach ($project->projectParts as $projectPart) {
+        foreach ($projectBuild->project->projectParts as $projectPart) {
             $projectBuildParts = $projectBuild->parts->where('project_part_id', $projectPart->id);
 
             $projectBuildParts = $this->sortProjectBuildPartsByPriority($projectBuild, $projectBuildParts);

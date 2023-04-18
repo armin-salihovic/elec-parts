@@ -54,7 +54,7 @@ function onDelete(id) {
 }
 
 function onShow(id) {
-    router.visit(route('projects.builds.edit', [route().params.project, id]));
+    router.visit(route('project-builds.edit', [route().params.project, id]));
 }
 
 </script>
@@ -70,7 +70,7 @@ function onShow(id) {
         <Toast />
         <ConfirmDialog />
         <AFormCard>
-            <Button class="mb-4" @click="router.visit(route('projects.builds.create', route().params.project))">Start a build</Button>
+            <Button class="mb-4" @click="router.visit(route('project-builds.create', route().params.project))">Start a build</Button>
             <DataTable
                 :value="data"
                 :autoLayout="true"

@@ -74,7 +74,7 @@ function loadProjectParts(projectPart) {
 }
 
 function handleSelectionOrderChange() {
-    const uri = route('projects.builds.update-priority', route().params.project_build);
+    const uri = route('project-builds.update-priority', route().params.project_build);
 
     const data = {
         selection_priority: props.project_build['selection_priority'],
@@ -136,7 +136,7 @@ function handleSelectionOrderChange() {
                                         </div>
                                     </div>
                                     <div class="self-end">
-                                        <Button @click="router.visit(route('projects.builds.show', [route().params.project, route().params.project_build]))">Review</Button>
+                                        <Button @click="router.visit(route('project-builds.show', [route().params.project, route().params.project_build]))">Review</Button>
                                     </div>
                                 </div>
                             </div>

@@ -8,7 +8,7 @@ import { Head } from '@inertiajs/vue3';
 import ProjectLayout from "@/Layouts/ProjectLayout.vue";
 
 function handleSubmit() {
-    router.post(route('projects.builds.store', route().params.project), form.value);
+    router.post(route('project-builds.store', route().params.project), form.value);
 }
 
 defineProps({
