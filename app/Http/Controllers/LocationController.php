@@ -16,9 +16,6 @@ class LocationController extends Controller
     {
         $locations = QueryBuilder::for(Location::class)
             ->where('locations.user_id', auth()->user()->id)
-            ->whereHas('inventories', function ($query) {
-                $query->where('inventory_draft_id', null);
-            })
             ->allowedFilters(['name'])
             ->allowedSorts([AllowedSort::custom('size', new InventoryLocationSizeSort(), 'id'),])
             ->paginate(10)
@@ -99,7 +96,24 @@ class LocationController extends Controller
 
     public function destroy(Location $location)
     {
-        if (!$location->inventories->count())
-            $location->delete();
+        foreach ($location->inventoryDrafts as $inventoryDraft) {
+            if ($inventoryDraft->inventories->count() > 0) {
+                return to_route('locations.index')->withErrors([
+                    'message' => 'Location contains parts in drafts.',
+                ]);
+            } else {
+                $inventoryDraft->delete();
+            }
+        }
+
+        if ($location->inventories->contains('inventory_draft_id', null)) {
+            return to_route('locations.index')->withErrors([
+                'message' => 'Location contains parts in inventories.',
+            ]);
+        }
+
+        $location->delete();
+
+        return to_route('locations.index');
     }
 }

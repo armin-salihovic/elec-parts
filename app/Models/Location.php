@@ -22,4 +22,9 @@ class Location extends Model
     {
         return $this->hasMany(Inventory::class);
     }
+
+    public function inventoryDrafts(): HasMany
+    {
+        return $this->hasMany(InventoryDraft::class);
+    }
 }

@@ -8,6 +8,14 @@ import InputText from "primevue/inputtext";
 import {FilterMatchMode, FilterOperator} from "primevue/api";
 import {buildQueryUrl} from "@/primevue-datatable-params-builder";
 import CrudButton from "@/Components/CrudButton.vue";
+import {useToast} from "primevue/usetoast";
+import Toast from "primevue/toast";
+import ConfirmDialog from "primevue/confirmdialog";
+import {useConfirm} from "primevue/useconfirm";
+
+const toast = useToast();
+const confirm = useConfirm();
+
 
 const loading = ref(false);
 
@@ -75,8 +83,23 @@ function loadLazyData() {
     })
 }
 
-function onDelete(id) {
-    router.delete(route('locations.destroy', id));
+function onDelete(location) {
+    confirm.require({
+        message: `Are you sure you want to delete location ${location.name}?`,
+        header: 'Confirmation',
+        icon: 'pi pi-exclamation-triangle',
+        accept: () => {
+            router.delete(route('locations.destroy', location.id), {
+                preserveScroll: true,
+                onSuccess: () => {
+                    toast.add({ severity: 'success', summary: 'Success', detail: 'Location deleted.', life: 3000 });
+                },
+                onError: (data) => {
+                    toast.add({ severity: 'error', summary: 'Cannot delete', detail: data.message, life: 3000 });
+                }
+            });
+        },
+    });
 }
 
 function onShow(id) {
@@ -87,6 +110,8 @@ function onShow(id) {
 
 <template>
     <div class="py-12" v-if="data">
+        <Toast />
+        <ConfirmDialog />
         <div class="mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <DataTable
@@ -122,7 +147,7 @@ function onShow(id) {
                         <template #body="{data}">
                             <div class="flex gap-10">
                                 <CrudButton type="show" @click="onShow(data.id)" />
-                                <CrudButton type="delete" @click="onDelete(data.id)" />
+                                <CrudButton type="delete" @click="onDelete(data)" />
                             </div>
                         </template>
                     </Column>

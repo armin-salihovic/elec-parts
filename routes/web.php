@@ -47,8 +47,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('inventories/drafts', [InventoryDraftController::class, 'index'])->name('inventory-drafts.index');
     Route::delete('inventory-drafts/{inventory_draft}', [InventoryDraftController::class, 'destroy'])->name('inventory-drafts.destroy');
 
-    Route::get('inventories/locations', [LocationController::class, 'index'])->name('locations.index');
-    Route::get('inventories/locations/{location}/edit', [LocationController::class, 'edit'])->name('locations.edit');
+
+    Route::controller(LocationController::class)->group(function () {
+        Route::post('locations', 'store')->name('locations.store');
+        Route::put('locations/{location}', 'update')->name('locations.update');
+        Route::delete('locations/{location}', 'destroy')->name('locations.destroy');
+
+        Route::get('inventories/locations', 'index')->name('locations.index');
+        Route::get('inventories/locations/{location}/edit', 'edit')->name('locations.edit');
+    });
 
     Route::post('inventories/create/{inventory_draft}', [InventoryController::class, 'store'])->name('inventories.store');
     Route::resource('inventories', InventoryController::class)->except(['store']);
@@ -90,9 +97,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         });
     });
 
-    Route::post('locations', [LocationController::class, 'store'])->name('locations.store');
-    Route::put('locations/{location}', [LocationController::class, 'update'])->name('locations.update');
-    Route::delete('locations/{location}', [LocationController::class, 'destroy'])->name('locations.destroy');
+
 });
 
 require __DIR__ . '/auth.php';
