@@ -81,11 +81,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         });
     });
 
-
-    Route::post('projects/{project}/builds/{project_build}/parts/create', [ProjectBuildPartController::class, 'store'])->name('projects.builds.parts.store');
-    Route::get('projects/{project}/builds/{project_build}/parts/{project_part}', [ProjectBuildPartController::class, 'index'])->name('projects.builds.parts.index');
-    Route::get('projects/{project}/builds/{project_build}/parts/{project_part}/draft', [ProjectBuildPartController::class, 'getProjectBuildPartsDraft'])->name('projects.builds.parts.draft');
-    Route::delete('projects/{project}/builds/{project_build}/parts/{project_part}/inventory/{inventory}', [ProjectBuildPartController::class, 'delete'])->name('projects.builds.parts.delete');
+    Route::controller(ProjectBuildPartController::class)->group(function () {
+        Route::prefix('projects/{project}/builds/{project_build}/parts')->group(function () {
+            Route::post('/create', 'store')->name('project-build-parts.store');
+            Route::get('/{project_part}', 'index')->name('project-build-parts.index');
+            Route::get('/{project_part}/draft', 'getProjectBuildPartsDraft')->name('project-build-parts.draft');
+            Route::delete('/{project_part}/inventory/{inventory}', 'destroy')->name('project-build-parts.destroy');
+        });
+    });
 
     Route::post('locations', [LocationController::class, 'store'])->name('locations.store');
     Route::put('locations/{location}', [LocationController::class, 'update'])->name('locations.update');

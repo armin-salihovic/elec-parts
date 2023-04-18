@@ -30,7 +30,7 @@ function onRowCollapse (event) {
 function addInventoryPart(inventory, projectPart) {
     inventory['selected'] = true;
 
-    const uri = route('projects.builds.parts.store', [route().params.project, route().params.project_build]);
+    const uri = route('project-build-parts.store', [route().params.project, route().params.project_build]);
 
     const data = {
         inventory_id: inventory['id'],
@@ -47,7 +47,7 @@ function addInventoryPart(inventory, projectPart) {
 }
 
 function deleteInventoryPart(inventoryId, projectPart) {
-    const uri = route('projects.builds.parts.delete', [
+    const uri = route('project-build-parts.destroy', [
         route().params.project,
         route().params.project_build,
         projectPart['id'],
@@ -65,7 +65,7 @@ function isLoaded(projectPart) {
 }
 
 function loadProjectParts(projectPart) {
-    const uri = route('projects.builds.parts.index', [route().params.project, route().params.project_build, projectPart['id']]);
+    const uri = route('project-build-parts.index', [route().params.project, route().params.project_build, projectPart['id']]);
 
     axios.get(uri).then(({data}) => {
         projectPart.matched_parts = data;

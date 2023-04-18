@@ -36,7 +36,7 @@ function isLoaded(projectPart) {
 }
 
 function loadProjectParts(projectPart) {
-    const uri = route('projects.builds.parts.draft', [route().params.project, route().params.project_build, projectPart['id']]);
+    const uri = route('project-build-parts.draft', [route().params.project, route().params.project_build, projectPart['id']]);
 
     axios.get(uri).then(({data}) => {
         projectPart.matched_parts = data;

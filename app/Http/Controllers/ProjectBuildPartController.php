@@ -80,7 +80,7 @@ class ProjectBuildPartController extends Controller
 
     }
 
-    public function delete (Project $project, ProjectBuild $projectBuild, ProjectPart $projectPart, Inventory $inventory)
+    public function destroy (Project $project, ProjectBuild $projectBuild, ProjectPart $projectPart, Inventory $inventory)
     {
         $projectBuildPart = ProjectBuildPart::where('project_build_id', $projectBuild->id)
             ->where('project_part_id', $projectPart->id)
