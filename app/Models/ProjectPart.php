@@ -59,9 +59,22 @@ class ProjectPart extends Model
         return $inventoryQuantity;
     }
 
-    function isLoaded(ProjectBuild $projectBuild)
+    function isLoaded(ProjectBuild $projectBuild): bool
     {
-        return $this->inventoryQuantity($projectBuild) >= $this->quantity * $projectBuild->quantity;
+
+        if(!$projectBuild->completed)
+            return $this->inventoryQuantity($projectBuild) >= $this->quantity * $projectBuild->quantity;
+
+        $need = $this->quantity * $projectBuild->quantity;
+        $have = 0;
+
+        $projectBuildParts = $projectBuild->parts->where('project_part_id', $this->id)->where('used', true);
+
+        foreach ($projectBuildParts as $projectBuildPart) {
+            $have += $projectBuildPart->quantity;
+        }
+
+        return $need === $have;
     }
 
 }

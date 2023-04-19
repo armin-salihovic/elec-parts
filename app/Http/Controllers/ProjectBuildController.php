@@ -96,7 +96,7 @@ class ProjectBuildController extends Controller
                 return [
                     'id' => $projectPart->id,
                     'quantity' => $projectPart->quantity,
-                    'inventory_quantity' => $projectPart->inventoryQuantity($projectBuild),
+                    'is_loaded' => $projectPart->isLoaded($projectBuild),
                     'part_name' => $projectPart->part_name,
                     'description' => $projectPart->description,
                     'designators' => $projectPart->designators,

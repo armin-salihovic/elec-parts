@@ -31,10 +31,6 @@ function onRowCollapse (event) {
     console.log(event)
 }
 
-function isLoaded(projectPart) {
-    return projectPart['inventory_quantity'] >= projectPart['quantity'] * props.project_build['quantity'];
-}
-
 function loadProjectParts(projectPart) {
     const uri = route('project-build-parts.draft', [route().params.project, route().params.project_build, projectPart['id']]);
 
@@ -135,7 +131,7 @@ function loadProjectParts(projectPart) {
                                     </Column>
                                     <Column header="Loaded">
                                         <template #body="{data}">
-                                            <i v-if="isLoaded(data)" class="pi pi-check-circle text-green-600" style="font-size: 1.5rem"></i>
+                                            <i v-if="data['is_loaded']" class="pi pi-check-circle text-green-600" style="font-size: 1.5rem"></i>
                                             <i v-else class="pi pi-info-circle text-orange-600" style="font-size: 1.5rem"></i>
                                         </template>
                                     </Column>
