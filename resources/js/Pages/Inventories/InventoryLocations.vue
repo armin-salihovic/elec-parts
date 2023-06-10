@@ -130,6 +130,9 @@ function onShow(id) {
                     @filter="onFilter"
                     @sort="onSort($event)"
                 >
+                    <template #empty>
+                        <div class="text-center">No records found.</div>
+                    </template>
                     <Column field="name" header="Name" :showFilterOperator="false" :max-constraints="1">
                         <template #editor="{ data, field }">
                             <InputText v-model="data[field]" />

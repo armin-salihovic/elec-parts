@@ -105,6 +105,9 @@ function loadLazyData() {
                         @filter="onFilter"
                         @sort="onSort($event)"
                     >
+                        <template #empty>
+                            <div class="text-center">No records found.</div>
+                        </template>
                         <Column field="part.name" header="Name" :showFilterOperator="false" :max-constraints="1">
                             <template #body="{data}">
                                 {{data["part.name"]}}

@@ -104,6 +104,9 @@ function onContinue(id) {
                     @filter="onFilter"
                     @sort="onSort($event)"
                 >
+                    <template #empty>
+                        <div class="text-center">No records found.</div>
+                    </template>
                     <Column field="id" header="ID" :showFilterOperator="false" :max-constraints="1" />
                     <Column field="size" header="Size" filterField="size" dataType="numeric" :showFilterOperator="false" :max-constraints="1" :sortable="true" />
                     <Column field="created_at" header="Created" filterField="created_at" dataType="date" :showFilterOperator="false" :max-constraints="1" :sortable="true" />

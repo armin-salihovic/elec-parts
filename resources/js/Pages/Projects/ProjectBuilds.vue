@@ -85,6 +85,9 @@ function onShow(id) {
                 :scrollable="true"
                 scrollHeight="400px"
             >
+                <template #empty>
+                    <div class="text-center">No records found.</div>
+                </template>
                 <Column field="quantity" header="Quantity">
                     <template #editor="{ data, field }">
                         <InputText v-model="data[field]" placeholder="Quantity" />
@@ -96,7 +99,6 @@ function onShow(id) {
                     </template>
                 </Column>
                 <Column field="created_at" header="Created at"/>
-
                 <Column headerStyle="width: 4rem; text-align: center" bodyStyle="text-align: center; overflow: visible; padding: 0">
                     <template #body="{data}">
                         <CrudButton v-if="data['completed']" type="show" @click="onShow(data.id)" />

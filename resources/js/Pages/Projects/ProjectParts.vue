@@ -104,6 +104,9 @@ function onDelete(id) {
                 :scrollable="true"
                 scrollHeight="400px"
             >
+                <template #empty>
+                    <div class="text-center">No records found.</div>
+                </template>
                 <Column field="quantity" header="Quantity">
                     <template #editor="{ data, field }">
                         <InputText v-model="data[field]" placeholder="Quantity" />
