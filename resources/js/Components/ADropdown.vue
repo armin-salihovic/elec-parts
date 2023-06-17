@@ -15,7 +15,7 @@
                         <button @click="openTaydaModal" type="button" :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block w-full text-left px-4 py-2 text-sm']">Tayda</button>
                     </MenuItem>
                     <MenuItem v-slot="{ active }">
-                        <a href="#" :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm']">Mouser</a>
+                        <button @click="openMouserModal" type="button" :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block w-full text-left px-4 py-2 text-sm']">Mouser</button>
                     </MenuItem>
                     <MenuItem v-slot="{ active }">
                         <a href="#" :class="[active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm']">Digikey</a>
@@ -24,6 +24,7 @@
             </MenuItems>
         </transition>
         <ATaydaModal ref="taydaModal" />
+        <AMouserModal ref="mouserModal" />
     </Menu>
 </template>
 
@@ -32,12 +33,17 @@ import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 import { ChevronDownIcon } from '@heroicons/vue/24/solid'
 import ATaydaModal from "@/Components/ATaydaModal.vue";
 import {ref} from "vue";
+import AMouserModal from "@/Components/AMouserModal.vue";
 
 const taydaModal = ref(null);
+const mouserModal = ref(null);
 
 const openTaydaModal = () => {
     taydaModal.value.open = true;
 }
 
+const openMouserModal = () => {
+    mouserModal.value.open = true;
+}
 
 </script>

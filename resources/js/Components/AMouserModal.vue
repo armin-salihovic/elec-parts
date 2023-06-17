@@ -15,9 +15,9 @@
                                         <ArrowDownTrayIcon class="h-6 w-6 text-black-600" aria-hidden="true" />
                                     </div>
                                     <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                                        <DialogTitle as="h3" class="text-lg leading-6 font-medium text-gray-900"> Tayda order import </DialogTitle>
+                                        <DialogTitle as="h3" class="text-lg leading-6 font-medium text-gray-900"> Mouser order import </DialogTitle>
                                         <div class="mt-2">
-                                            <p class="text-sm text-gray-500">Import the items using the invoice PDF. The PDF can be downloaded from the orders section in your account.</p>
+                                            <p class="text-sm text-gray-500">Import the items using the excel document. The excel document can be downloaded by exporting it from the orders section in your Mouser account.</p>
                                         </div>
                                         <div class="mt-3">
                                             <input type="file" id="file" name="file" ref="file" :disabled="processing" @change="errors = []">
@@ -101,7 +101,7 @@ const upload = async() => {
         document: file.value.files[0],
         locationId: locationId.value,
         draftId: route().params.inventory_draft,
-        documentType: DocumentTypes.tayda,
+        documentType: DocumentTypes.mouser,
     }, {
         headers: {
             'Content-Type': 'multipart/form-data'

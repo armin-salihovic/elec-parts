@@ -42,7 +42,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('parts', PartController::class);
     Route::resource('projects', ProjectController::class);
     Route::put('projects/{project}/description', [ProjectController::class, 'updateDescription'])->name('projects-description.update');
-    Route::post('tayda-pdf-to-products', [PartController::class, 'pdfToProducts'])->name('tayda-pdf-to-products');
+    Route::post('import-parts-document', [PartController::class, 'importPartsDocument'])->name('import-parts-document');
 
     Route::controller(LocationController::class)->group(function () {
         Route::post('locations', 'store')->name('locations.store');
