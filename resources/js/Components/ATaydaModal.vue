@@ -30,13 +30,26 @@
                             </div>
                             <div v-else class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                                 <div class="sm:flex sm:items-start">
-                                    <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-green-100 sm:mx-0 sm:h-10 sm:w-10">
-                                        <CheckIcon class="h-6 w-6 text-green-600" aria-hidden="true" />
+                                    <div :class="[hasFailedParts ? 'bg-orange-100' : 'bg-green-100', 'mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full sm:mx-0 sm:h-10 sm:w-10']">
+                                        <ExclamationTriangleIcon v-if="hasFailedParts" class="h-6 w-6 text-orange-400" aria-hidden="true" />
+                                        <CheckIcon v-else class="h-6 w-6 text-green-600" aria-hidden="true" />
                                     </div>
                                     <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                                        <DialogTitle as="h3" class="text-lg leading-6 font-medium text-gray-900"> Success </DialogTitle>
-                                        <div class="mt-2">
-                                            <p class="text-sm text-gray-500">The invoice PDF was successfully imported to the current inventory creation list. </p>
+                                        <div v-if="hasFailedParts">
+                                            <DialogTitle as="h3" class="text-lg leading-6 font-medium text-gray-900"> Warning </DialogTitle>
+                                            <div class="mt-2">
+                                                <p class="text-sm text-gray-500">Some parts from the invoice PDF have not been imported. Consider creating them manually. </p>
+                                            </div>
+                                            <a @click="expandFailedParts" class="mt-4 cursor-pointer text-sm text-gray-500 underline underline-offset-2 pointer">View failed parts</a>
+                                            <div class="mt-2 flex" v-show="expand">
+                                                <p class="text-sm text-gray-500" v-for="(part, index) in failedParts"> {{ part['product']['sku'] }}<span v-if="index !== failedParts.length-1">,</span>&nbsp;</p>
+                                            </div>
+                                        </div>
+                                        <div v-else>
+                                            <DialogTitle as="h3" class="text-lg leading-6 font-medium text-gray-900"> Success </DialogTitle>
+                                            <div class="mt-2">
+                                                <p class="text-sm text-gray-500">The invoice PDF was successfully imported to the current inventory creation list. </p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -50,7 +63,7 @@
                                     Processing...
                                 </button>
                                 <button v-else-if="!processing && !processingComplete" type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-gray-900 text-base font-medium text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 sm:ml-3 sm:w-auto sm:text-sm" @click="upload">Import</button>
-                                <button v-else-if="processingComplete" type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-700 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm" @click="open = false">Done</button>
+                                <button v-else-if="processingComplete" type="button" :class="[hasFailedParts ? 'bg-orange-400 hover:bg-orange-400 focus:ring-orange-400' : 'bg-green-700 hover:bg-green-700 focus:ring-green-500', 'w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm']" @click="open = false">Done</button>
                                 <button v-if="!processing" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm" @click="open = false" ref="cancelButtonRef">Cancel</button>
                             </div>
                         </DialogPanel>
@@ -62,9 +75,10 @@
 </template>
 
 <script setup>
-import {inject, ref} from 'vue'
+import {computed, inject, ref} from 'vue'
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
 import { ArrowDownTrayIcon, CheckIcon } from '@heroicons/vue/24/outline'
+import { ExclamationTriangleIcon } from '@heroicons/vue/24/solid'
 import {router} from "@inertiajs/vue3";
 import {DocumentTypes} from "@/Enums/enum";
 
@@ -79,6 +93,12 @@ const locationId = inject('locationId');
 
 const errors = ref([]);
 
+const failedParts = ref([]);
+
+const hasFailedParts = computed(() => {
+    return failedParts.value.length > 0;
+})
+
 defineExpose({
     open
 });
@@ -86,6 +106,8 @@ defineExpose({
 function resetModal() {
     processing.value = false;
     processingComplete.value = false;
+    failedParts.value = [];
+    expand.value = false;
 }
 
 const upload = async() => {
@@ -109,7 +131,16 @@ const upload = async() => {
     }).then(({data}) => {
         router.reload({ only: ['parts'] })
         processingComplete.value = true;
+    }).catch(({response}) => {
+        router.reload({ only: ['parts'] })
+        failedParts.value = response.data['failed_parts'];
+        processingComplete.value = true;
     })
+}
 
+const expand = ref(false);
+
+function expandFailedParts () {
+    expand.value = !expand.value;
 }
 </script>

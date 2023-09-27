@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use App\Models\Part;
 use App\Models\Category;
+use App\Models\DistributorPart;
 use App\Models\Source;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -103,7 +103,7 @@ class DatabaseSeeder extends Seeder
         $json = json_decode($json_string, true);
 
         foreach ($json as $value) {
-            Part::create([
+            DistributorPart::create([
                 'name' => $value['name'],
                 'sku' => $value['sku'],
                 'price' => $value['price'],

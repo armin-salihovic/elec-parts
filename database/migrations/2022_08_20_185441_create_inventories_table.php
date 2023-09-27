@@ -15,11 +15,12 @@ return new class extends Migration
     {
         Schema::create('inventories', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('part_id')->constrained();
             $table->foreignId('location_id')->constrained();
             $table->foreignId('user_id')->constrained();
             $table->foreignId('inventory_draft_id')->nullable()->constrained();
             $table->integer('quantity');
+            $table->foreignId('inventoryable_id');
+            $table->string('inventoryable_type');
             $table->timestamps();
         });
     }

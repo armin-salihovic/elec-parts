@@ -10,6 +10,8 @@ class Source extends Model
 {
     use HasFactory;
 
+    protected $guarded = [];
+
     public function parts(): HasMany
     {
         return $this->hasMany(Part::class);

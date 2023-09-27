@@ -61,7 +61,13 @@ class InventoryController extends Controller
         $inventories = auth()->user()->inventories->where('inventory_draft_id', null);
 
         $inventoryDraft->inventories->map(function ($inventoryDraftPart) use ($inventories) {
-            if ($inventory = $inventories->where('part_id', $inventoryDraftPart->part->id)->where('location_id', $inventoryDraftPart->location->id)->first()) {
+            $inventory = $inventories
+                ->where('inventoryable_id', $inventoryDraftPart->part->id)
+                ->where('inventoryable_type', $inventoryDraftPart->inventoryable_type)
+                ->where('location_id', $inventoryDraftPart->location->id)
+                ->first();
+
+            if ($inventory) {
                 $inventory->quantity += $inventoryDraftPart->quantity;
                 $inventory->inventory_draft_id = null;
                 $inventory->save();
@@ -97,7 +103,8 @@ class InventoryController extends Controller
             ->inventories
             ->where('inventory_draft_id', $inventory->inventory_draft_id)
             ->where('location_id', $request->input('location'))
-            ->where('part_id', $inventory->part->id)
+            ->where('inventoryable_id', $inventory->part->id)
+            ->where('inventoryable_type', $inventory->inventoryable_type)
             ->first();
 
         if ($existingInventory && $inventory->id === $existingInventory->id) return;
@@ -153,7 +160,8 @@ class InventoryController extends Controller
 
         $inventoryPart = auth()->user()->inventories
             ->where('inventory_draft_id', $inventoryDraftId)
-            ->where('part_id', $part->id)
+            ->where('inventoryable_id', $part->id)
+            ->where('inventoryable_type', $part::class)
             ->where('location_id', $request->location)
             ->first();
 
@@ -162,7 +170,8 @@ class InventoryController extends Controller
             $inventoryPart->save();
         } else {
             Inventory::create([
-                'part_id' => $part->id,
+                'inventoryable_id' => $part->id,
+                'inventoryable_type' => $part::class,
                 'location_id' => $request->location,
                 'inventory_draft_id' => $inventoryDraftId,
                 'user_id' => auth()->user()->id,

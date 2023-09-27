@@ -118,7 +118,8 @@ class InventoryAddBySkuTest extends TestCase
     function createInventoryEntry($draftId)
     {
         return Inventory::create([
-            'part_id' => $this->part->id,
+            'inventoryable_id' => $this->part->id,
+            'inventoryable_type' => $this->part::class,
             'location_id' => $this->location->id,
             'user_id' => $this->user->id,
             'inventory_draft_id' => $draftId,
@@ -129,7 +130,8 @@ class InventoryAddBySkuTest extends TestCase
     function assertInventoryEntry($quantity, $draftId)
     {
         $this->assertDatabaseHas('inventories', [
-            'part_id' => $this->part->id,
+            'inventoryable_id' => $this->part->id,
+            'inventoryable_type' => $this->part::class,
             'location_id' => $this->location->id,
             'user_id' => $this->user->id,
             'inventory_draft_id' => $draftId,

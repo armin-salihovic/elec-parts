@@ -68,7 +68,8 @@ class InventoryUpdateLocationTest extends TestCase
 
         $this->assertDatabaseHas('inventories', [
             'id' => $this->inventory1->id,
-            'part_id' => $this->inventory1->part_id,
+            'inventoryable_id' => $this->inventory1->part->id,
+            'inventoryable_type' => Part::class,
             'location_id' => $this->locations[3]->id,
             'user_id' => $this->user->id,
         ]);
@@ -93,7 +94,8 @@ class InventoryUpdateLocationTest extends TestCase
 
         $this->assertDatabaseHas('inventories', [
             'id' => $this->inventory2->id,
-            'part_id' => $this->inventory1->part_id,
+            'inventoryable_id' => $this->inventory1->part->id,
+            'inventoryable_type' => Part::class,
             'location_id' => $this->inventory2->location_id,
             'user_id' => $this->user->id,
             'quantity' => $this->inventory1->quantity + $this->inventory2->quantity,
@@ -105,7 +107,8 @@ class InventoryUpdateLocationTest extends TestCase
 
         $this->assertDatabaseHas('inventories', [
             'id' => $inventory3->id,
-            'part_id' => $inventory3->part_id,
+            'inventoryable_id' => $inventory3->part->id,
+            'inventoryable_type' => Part::class,
             'location_id' => $inventory3->location_id,
             'user_id' => $this->user->id,
             'inventory_draft_id' => $inventory3->inventory_draft_id,
@@ -123,7 +126,8 @@ class InventoryUpdateLocationTest extends TestCase
 
         $this->assertDatabaseHas('inventories', [
             'id' => $this->inventory1->id,
-            'part_id' => $this->inventory1->part_id,
+            'inventoryable_id' => $this->inventory1->part->id,
+            'inventoryable_type' => Part::class,
             'location_id' => $this->inventory1->location_id,
             'user_id' => $this->user->id,
             'quantity' => $this->inventory1->quantity,

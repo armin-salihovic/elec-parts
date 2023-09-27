@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\Part;
+use App\Models\DistributorPart;
 use App\Models\Source;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Facades\Excel;
@@ -17,7 +17,7 @@ class MouserService
     /**
      * @throws \Exception
      */
-    public function getParts($file): Collection
+    public function getParts($file): array
     {
         $mouserRows = Excel::toArray([], $file);
 
@@ -34,9 +34,9 @@ class MouserService
             $row['description'] = $mouserRow[8];
             $row['quantity'] = $mouserRow[10];
 
-            $part = Part::where('sku', $row['sku'])->first();
+            $part = DistributorPart::where('sku', $row['sku'])->first();
             if ($part === null) {
-                $part = Part::create([
+                $part = DistributorPart::create([
                     'name' => $row['description'],
                     'sku' => $row['sku'],
                     'price' => null,
@@ -51,6 +51,9 @@ class MouserService
 
             $partsCollection->push($part);
         }
-        return $partsCollection;
+        return [
+            'parts' => $partsCollection,
+            'failed_parts' => [],
+        ];
     }
 }
