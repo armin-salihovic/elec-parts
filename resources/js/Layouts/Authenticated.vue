@@ -6,6 +6,7 @@ import BreezeDropdownLink from '@/Components/DropdownLink.vue';
 import BreezeNavLink from '@/Components/NavLink.vue';
 import BreezeResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import { Link } from '@inertiajs/vue3';
+import { CpuChipIcon, CubeIcon, HeartIcon, HomeIcon } from '@heroicons/vue/24/outline'
 
 const fullPageLayout = ref(true);
 
@@ -30,19 +31,19 @@ const showingNavigationDropdown = ref(false);
                             <!-- Navigation Links -->
                             <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
                                 <BreezeNavLink :href="route('dashboard')" :active="route().current('dashboard')">
-                                    Dashboard
+                                    <HomeIcon class="h-6 w-6 mr-1" aria-hidden="true" /> Dashboard
+                                </BreezeNavLink>
+                                <BreezeNavLink :href="route('parts.index')" :active="route().current('parts.index')">
+                                    <CpuChipIcon class="h-6 w-6 mr-1" aria-hidden="true" /> Parts
+                                </BreezeNavLink>
+                                <BreezeNavLink :href="route('inventories.index')" :active="route().current('inventories.index')">
+                                    <CubeIcon class="h-6 w-6 mr-1" aria-hidden="true" /> Inventory
+                                </BreezeNavLink>
+                                <BreezeNavLink :href="route('projects.index')" :active="route().current('projects.index')">
+                                    <HeartIcon class="h-6 w-6 mr-1" aria-hidden="true" /> Projects
                                 </BreezeNavLink>
                                 <BreezeNavLink :href="route('categories.index')" :active="route().current('categories.index')">
                                     Categories
-                                </BreezeNavLink>
-                                <BreezeNavLink :href="route('parts.index')" :active="route().current('parts.index')">
-                                    Parts
-                                </BreezeNavLink>
-                                <BreezeNavLink :href="route('inventories.index')" :active="route().current('inventories.index')">
-                                    Inventory
-                                </BreezeNavLink>
-                                <BreezeNavLink :href="route('projects.index')" :active="route().current('projects.index')">
-                                    Projects
                                 </BreezeNavLink>
                             </div>
                         </div>
