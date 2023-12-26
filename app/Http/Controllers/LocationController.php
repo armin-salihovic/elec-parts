@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Inventory;
 use App\Models\InventoryDraft;
 use App\Models\Location;
 use App\Sorts\InventoryLocationSizeSort;
@@ -21,10 +22,10 @@ class LocationController extends Controller
             ->paginate(10)
             ->appends(request()->query())
             ->through(function ($location) {
-
-                $locationSize = $location->inventories->filter(function ($inventory) {
-                    return $inventory->inventory_draft_id === null;
-                })->count();
+                $locationSize = Inventory::where('inventory_draft_id', '=', null)
+                    ->where('location_id', $location->id)
+                    ->where('quantity', '>', 0)
+                    ->count();
 
                 return [
                     'id' => $location->id,
@@ -70,9 +71,10 @@ class LocationController extends Controller
     {
         $locations = auth()->user()->locations;
 
-        $inventoryPartsFiltered = $location->inventories->filter(function ($inventory) {
-            return $inventory->inventory_draft_id === null;
-        });
+        $inventoryPartsFiltered = Inventory::where('inventory_draft_id', '=', null)
+            ->where('location_id', $location->id)
+            ->where('quantity', '>', 0)
+            ->get();
 
         $inventoryParts = $inventoryPartsFiltered->map(function ($inventory) {
             return [
