@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Inventory;
 use App\Models\InventoryDraft;
 use App\Models\Part;
+use App\Models\ProjectBuildPart;
 use App\Models\Source;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
@@ -31,6 +32,7 @@ class InventoryController extends Controller
                     'quantity' => $inventory->quantity,
                     'part.source.name' => $inventory->part->source->name,
                     'location.name' => $inventory->location->name,
+                    'location.id' => $inventory->location->id,
                 ];
             });
 
@@ -110,6 +112,24 @@ class InventoryController extends Controller
         if ($existingInventory && $inventory->id === $existingInventory->id) return;
 
         if ($existingInventory) {
+            $projectBuildParts = ProjectBuildPart::where('inventory_id', $inventory->id)->get();
+
+            foreach ($projectBuildParts as $projectBuildPart) {
+                $existingProjectBuildPart = ProjectBuildPart::where('project_build_id', $projectBuildPart->project_build_id)
+                    ->where('project_part_id', $projectBuildPart->project_part_id)
+                    ->where('inventory_id', $existingInventory->id)
+                    ->first();
+
+                if($existingProjectBuildPart) {
+                    $existingProjectBuildPart->quantity += $projectBuildPart->quantity;
+                    $existingProjectBuildPart->save();
+                    $projectBuildPart->delete();
+                } else {
+                    $projectBuildPart->inventory_id = $existingInventory->id;
+                    $projectBuildPart->save();
+                }
+            }
+
             $existingInventory->quantity += $inventory->quantity;
             $existingInventory->save();
             $inventory->delete();
