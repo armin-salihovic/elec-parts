@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\Part;
+use App\Models\DistributorPart;
 use Illuminate\Support\Collection;
 
 class TaydaService
@@ -32,13 +32,13 @@ class TaydaService
                 break;
             }
         }
-        return Part::where('sku', $product['sku'])->first();
+        return DistributorPart::where('sku', $product['sku'])->first();
     }
 
     /**
      * @throws \Exception
      */
-    public function getParts($file): Collection
+    public function getParts($file): array
     {
         // Parse PDF file and build necessary objects.
         $parser = new \Smalot\PdfParser\Parser();
@@ -56,7 +56,7 @@ class TaydaService
         $partsCollection = collect();
 
         foreach ($products as $product) {
-            $part = Part::where('sku', $product['sku'])->first();
+            $part = DistributorPart::where('sku', $product['sku'])->first();
             if ($part === null) {
                 $part = TaydaService::fixSkuError($documentArray, $product);
 
@@ -70,17 +70,10 @@ class TaydaService
             $partsCollection->push($part);
         }
 
-        if (count($failed) > 0) {
-            dump("Failed products: " . count($failed));
-            dump($failed);
-
-            throw new \Exception("Failed products: " . count($failed));
-        } else if (count($products) === 0) {
-//            dd("failed");
-            throw new \Exception("Failed");
-        }
-
-        return $partsCollection;
+        return [
+            'parts' => $partsCollection,
+            'failed_parts' => $failed,
+        ];
     }
 
 }

@@ -17,7 +17,7 @@ class InventoryFactory extends Factory
     public function definition()
     {
         return [
-            'quantity' => fake()->numberBetween(1, 100),
+            'quantity' => fake()->numberBetween(30, 100),
         ];
     }
 }

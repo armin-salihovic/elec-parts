@@ -164,6 +164,9 @@ function handleSelectionOrderChange() {
                                 >
                                     <Column :expander="true" headerStyle="width: 3rem" />
                                     <Column field="part_name" header="Part">
+                                        <template #body="{data}">
+                                            <div :title="data['part_name']">{{data['part_name']}}</div>
+                                        </template>
                                         <template #editor="{ data, field }">
                                             <InputText v-model="data[field]" placeholder="Part name" />
                                         </template>
@@ -202,7 +205,11 @@ function handleSelectionOrderChange() {
                                                         <Button v-else @click="addInventoryPart(data, slotProps.data)">Select</Button>
                                                     </template>
                                                 </Column>
-                                                <Column field="name" header="Name" />
+                                                <Column header="Name">
+                                                    <template #body="{data}">
+                                                        <div :title="data['name']">{{data['name']}}</div>
+                                                    </template>
+                                                </Column>
                                                 <Column field="sku" header="SKU" />
                                                 <Column field="quantity" header="Quantity" />
                                                 <Column header="Need">

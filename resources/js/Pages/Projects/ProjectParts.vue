@@ -25,10 +25,15 @@ const props = defineProps({
     data: Object,
 })
 
-function addProjectPart() {
-    router.post(route('project-parts.store', route().params.project), projectPart.value, {
+async function addProjectPart() {
+    await router.post(route('project-parts.store', route().params.project), projectPart.value, {
         preserveScroll: true,
     });
+
+    projectPart.value.quantity = '';
+    projectPart.value.part_name = '';
+    projectPart.value.description = '';
+    projectPart.value.designators = '';
 }
 
 function onRowEditSave(event) {

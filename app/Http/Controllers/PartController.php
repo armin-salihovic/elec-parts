@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\DocumentType;
-use App\Http\Resources\PartWithQuantityResource;
+use App\Models\DistributorPart;
 use App\Models\Inventory;
 use App\Models\InventoryDraft;
 use App\Models\Part;
@@ -169,13 +169,20 @@ class PartController extends Controller
             $inventoryDraft = InventoryDraft::find($request->input('draftId'));
             $inventoryDraft->update(['location_id' => $request->input('locationId')]);
 
-            $partsCollection->map(function ($part) use ($inventoryDraft) {
-                if ($inventory = $inventoryDraft->inventories->where('part_id', $part->id)->where('location_id', $inventoryDraft->location->id)->first()) {
+            $partsCollection['parts']->map(function ($part) use ($inventoryDraft) {
+                $inventory = $inventoryDraft->inventories
+                    ->where('inventoryable_id', $part->id)
+                    ->where('inventoryable_type', DistributorPart::class)
+                    ->where('location_id', $inventoryDraft->location->id)
+                    ->first();
+
+                if ($inventory) {
                     $inventory->quantity += $part->quantity;
                     $inventory->save();
                 } else {
                     Inventory::create([
-                        'part_id' => $part->id,
+                        'inventoryable_id' => $part->id,
+                        'inventoryable_type' => DistributorPart::class,
                         'location_id' => $inventoryDraft->location->id,
                         'inventory_draft_id' => $inventoryDraft->id,
                         'user_id' => auth()->user()->id,
@@ -184,7 +191,13 @@ class PartController extends Controller
                 }
             });
 
-            return PartWithQuantityResource::collection($partsCollection);
+            if(count($partsCollection['failed_parts']) > 0) {
+                return response()->json([
+                    'failed_parts' => $partsCollection['failed_parts'],
+                ], 400);
+            }
+
+            return response()->json();
         }
 
         return response()->json([

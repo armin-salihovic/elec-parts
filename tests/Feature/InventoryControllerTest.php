@@ -151,7 +151,7 @@ class InventoryControllerTest extends TestCase
 
         foreach ($this->location0inventories as $inventory) {
             foreach ($location0inventories as $inventory2) {
-                if($inventory->part_id === $inventory2->part_id) {
+                if($inventory->part->id === $inventory2->part->id && $inventory->inventryable_type === $inventory2->inventoryable_type) {
                     $this->assertDatabaseHas('inventories', [
                         'id' => $inventory->id,
                         'quantity' => $inventory->quantity + $inventory2->quantity,
@@ -212,7 +212,7 @@ class InventoryControllerTest extends TestCase
 
         foreach ($this->location0inventories as $inventory) {
             foreach ($location0inventoriesPart1 as $inventory2) {
-                if($inventory->part_id === $inventory2->part_id) {
+                if($inventory->part->id === $inventory2->part->id && $inventory->inventryable_type === $inventory2->inventoryable_type) {
                     $this->assertDatabaseHas('inventories', [
                         'id' => $inventory->id,
                         'quantity' => $inventory->quantity + $inventory2->quantity,
