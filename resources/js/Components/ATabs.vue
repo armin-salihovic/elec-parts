@@ -19,7 +19,7 @@
                       ]"
                       :aria-current="tab.route === route().current() ? 'page' : undefined"
                   >
-                      {{ tab.name }}
+                      <span class="flex items-center"><component :is="tab.icon" class="h-6 w-6 mr-1"></component> <span>{{ tab.name }}</span></span>
                   </Link>
               </nav>
           </div>
