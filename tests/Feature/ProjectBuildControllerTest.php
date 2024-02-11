@@ -113,13 +113,13 @@ class ProjectBuildControllerTest extends TestCase
         $this->assertDatabaseHas('project_build_parts', [
             'id' => $projectBuildParts[0]->id,
             'used' => 0,
-            'quantity' => 0
+            'quantity' => $projectBuildParts[0]->quantity,
         ]);
 
         $this->assertDatabaseHas('project_build_parts', [
             'id' => $projectBuildParts[1]->id,
             'used' => 0,
-            'quantity' => 0
+            'quantity' => $projectBuildParts[1]->quantity,
         ]);
 
         $this->assertDatabaseHas('inventories', [
@@ -190,7 +190,7 @@ class ProjectBuildControllerTest extends TestCase
         ]));
 
         $projectParts->push(ProjectPart::create([
-            'quantity' => $this->location0inventories[2]->quantity,
+            'quantity' => $this->location0inventories[2]->quantity/$projectBuild->quantity,
             'part_name' => 'LED Blue',
             'description' => fake()->name(),
             'designators' => fake()->name(),
@@ -204,7 +204,7 @@ class ProjectBuildControllerTest extends TestCase
             'project_part_id' => $projectParts[0]->id,
             'inventory_id' => $this->location0inventories[0]->id,
             'used' => 0,
-            'quantity' => 0,
+            'quantity' => $projectParts[0]->quantity * $projectBuild->quantity,
         ]));
 
         $projectBuildParts->push(ProjectBuildPart::create([
@@ -212,7 +212,7 @@ class ProjectBuildControllerTest extends TestCase
             'project_part_id' => $projectParts[1]->id,
             'inventory_id' => $this->location0inventories[1]->id,
             'used' => 0,
-            'quantity' => 0,
+            'quantity' => $projectParts[1]->quantity * $projectBuild->quantity,
         ]));
 
         $projectBuildParts->push(ProjectBuildPart::create([
@@ -220,7 +220,7 @@ class ProjectBuildControllerTest extends TestCase
             'project_part_id' => $projectParts[2]->id,
             'inventory_id' => $this->location0inventories[2]->id,
             'used' => 0,
-            'quantity' => 0,
+            'quantity' => $projectParts[2]->quantity * $projectBuild->quantity,
         ]));
 
         // request

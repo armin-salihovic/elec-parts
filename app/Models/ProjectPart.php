@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ProjectPart extends Model
 {
@@ -17,31 +18,9 @@ class ProjectPart extends Model
         return $this->belongsTo(Project::class);
     }
 
-    function getSelectedInventoryParts($projectBuildParts)
+    public function projectBuildParts(): HasMany
     {
-        $searchValues = preg_split('/\s+/', $this->part_name, -1, PREG_SPLIT_NO_EMPTY);
-
-        $inventories = Inventory::where('inventory_draft_id', null);
-
-        foreach($searchValues as $searchTerm){
-            $inventories->whereHas('part', function($relation) use ($searchTerm){
-                $relation->where('name', 'like', '%'.$searchTerm.'%');
-            });
-        }
-
-        $inventories = $inventories->get();
-
-        return $inventories->map(function ($inventory) use ($projectBuildParts) {
-            return [
-                'id' => $inventory->id,
-                'name' => $inventory->part->name,
-                'sku' => $inventory->part->sku,
-                'quantity' => $inventory->quantity,
-                'source' => $inventory->part->source->name,
-                'location' => $inventory->location->name,
-                'selected' => $projectBuildParts->contains('id', $inventory->id),
-            ];
-        });
+        return $this->hasMany(ProjectBuildPart::class);
     }
 
     function inventoryQuantity(ProjectBuild $projectBuild)
@@ -62,7 +41,7 @@ class ProjectPart extends Model
     function isLoaded(ProjectBuild $projectBuild): bool
     {
 
-        if(!$projectBuild->completed)
+        if (!$projectBuild->completed)
             return $this->inventoryQuantity($projectBuild) >= $this->quantity * $projectBuild->quantity;
 
         $need = $this->quantity * $projectBuild->quantity;

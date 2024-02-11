@@ -5,18 +5,30 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use App\Models\ProjectBuild;
 use App\Models\ProjectPart;
+use App\Repositories\InventoryRepository;
+use App\Repositories\ProjectPartRepository;
 use App\Services\ProjectBuildService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class ProjectBuildController extends Controller
 {
-    private $projectBuildService;
+    private ProjectBuildService $projectBuildService;
+    private InventoryRepository $inventoryRepository;
+    private ProjectPartRepository $projectPartRepository;
 
-    public function __construct(ProjectBuildService $projectBuildService)
+    /**
+     * @param ProjectBuildService $projectBuildService
+     * @param InventoryRepository $inventoryRepository
+     * @param ProjectPartRepository $projectPartRepository
+     */
+    public function __construct(ProjectBuildService $projectBuildService, InventoryRepository $inventoryRepository, ProjectPartRepository $projectPartRepository)
     {
         $this->projectBuildService = $projectBuildService;
+        $this->inventoryRepository = $inventoryRepository;
+        $this->projectPartRepository = $projectPartRepository;
     }
+
 
     public function index(Project $project)
     {
@@ -71,12 +83,13 @@ class ProjectBuildController extends Controller
                 return [
                     'id' => $projectPart->id,
                     'quantity' => $projectPart->quantity,
-                    'inventory_quantity' => $projectPart->inventoryQuantity($projectBuild),
+                    'inventory_quantity' => $this->projectPartRepository->inventoryQuantity($projectBuild, $projectPart),
                     'part_name' => $projectPart->part_name,
                     'description' => $projectPart->description,
                     'designators' => $projectPart->designators,
                     'matched_parts' => [],
                     'matched_parts_loading' => true,
+                    'is_loaded' => $this->projectPartRepository->isLoaded($projectBuild, $projectPart),
                 ];
             })
         ]);
