@@ -7,17 +7,33 @@ use App\Models\Project;
 use App\Models\ProjectBuild;
 use App\Models\ProjectBuildPart;
 use App\Models\ProjectPart;
+use App\Repositories\InventoryRepository;
+use App\Repositories\ProjectPartRepository;
+use App\Services\InventoryService;
 use App\Services\ProjectBuildService;
 use Illuminate\Http\Request;
 
 class ProjectBuildPartController extends Controller
 {
-    private $projectBuildService;
+    private ProjectBuildService $projectBuildService;
+    private InventoryService $inventoryService;
+    private InventoryRepository $inventoryRepository;
+    private ProjectPartRepository $projectPartRepository;
 
-    public function __construct(ProjectBuildService $projectBuildService)
+    /**
+     * @param ProjectBuildService $projectBuildService
+     * @param InventoryService $inventoryService
+     * @param InventoryRepository $inventoryRepository
+     * @param ProjectPartRepository $projectPartRepository
+     */
+    public function __construct(ProjectBuildService $projectBuildService, InventoryService $inventoryService, InventoryRepository $inventoryRepository, ProjectPartRepository $projectPartRepository)
     {
         $this->projectBuildService = $projectBuildService;
+        $this->inventoryService = $inventoryService;
+        $this->inventoryRepository = $inventoryRepository;
+        $this->projectPartRepository = $projectPartRepository;
     }
+
 
     public function index (Project $project, ProjectBuild $projectBuild, ProjectPart $projectPart)
     {
@@ -25,7 +41,7 @@ class ProjectBuildPartController extends Controller
            $q->where('project_build_id', $projectBuild->id)->where('project_part_id', $projectPart->id);
         })->get();
 
-        $projectBuildParts = $projectPart->getSelectedInventoryParts($inventories);
+        $projectBuildParts = $this->inventoryService->getSelectedInventoryParts($inventories, $projectPart);
 
         if($inventories->count() > 0) {
             $sorted = $projectBuildParts->sortByDesc('selected');
@@ -63,15 +79,33 @@ class ProjectBuildPartController extends Controller
         ]);
 
         $projectPart = ProjectPart::findOrFail($request->project_part_id);
+        $inventory = Inventory::findOrFail($request->inventory_id);
+
+        $usableInventoryQuantity = $this->inventoryRepository->getUsableInventoryQuantity($inventory);
+
+        if($usableInventoryQuantity === 0) {
+            return response()->json([
+                'error' => "Usable inventory is 0. Cannot reserve this part.",
+            ], 400);
+        }
+
+        $wantQuantity = $projectBuild->quantity * $projectPart->quantity;
+
+        if($wantQuantity > $usableInventoryQuantity) {
+            $wantQuantity = $usableInventoryQuantity;
+        }
 
         ProjectBuildPart::create([
             'project_build_id' => $projectBuild->id,
             'project_part_id' => $request->project_part_id,
-            'inventory_id' => $request->inventory_id,
+            'inventory_id' => $inventory->id,
+            'quantity' => $wantQuantity,
         ]);
 
         return response()->json([
-            'inventory_quantity' => $projectPart->inventoryQuantity($projectBuild),
+            'inventory_quantity' => $this->projectPartRepository->inventoryQuantity($projectBuild, $projectPart),
+            'available_inv_quantity' => $this->inventoryRepository->getUsableInventoryQuantity($inventory),
+            'is_loaded' => $this->projectPartRepository->isLoaded($projectBuild, $projectPart),
         ]);
     }
 
@@ -91,6 +125,7 @@ class ProjectBuildPartController extends Controller
 
         return response()->json([
             'inventory_quantity' => $projectPart->inventoryQuantity($projectBuild),
+            'is_loaded' => $this->projectPartRepository->isLoaded($projectBuild, $projectPart),
         ]);
     }
 }
