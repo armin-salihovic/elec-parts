@@ -203,7 +203,7 @@ function handleSelectionOrderChange() {
                                                 </template>
                                                 <Column headerStyle="width:2rem">
                                                     <template #body="{data}">
-                                                        <Button v-if="data['selected']" @click="deleteInventoryPart(data['id'], slotProps.data)">Remove</Button>
+                                                        <Button v-if="data['selected']" @click="deleteInventoryPart(data['id'], slotProps.data)" color="orange">Remove</Button>
                                                         <Button v-else @click="addInventoryPart(data, slotProps.data)">Select</Button>
                                                     </template>
                                                 </Column>
@@ -215,8 +215,10 @@ function handleSelectionOrderChange() {
                                                 <Column field="sku" header="SKU" />
                                                 <Column header="Quantity">
                                                     <template #body="{data}">
-                                                        <span>{{ data['quantity'] }}</span>
-                                                        <span v-if="data['reserved_quantity'] > 0" class="text-orange-700">&nbsp;({{ data['reserved_quantity'] }} reserved)</span>
+                                                        <div>
+                                                            <span>{{ data['quantity'] }} available</span><br>
+                                                            <span v-if="data['reserved_quantity'] > 0" class="text-blue-700 underline cursor-pointer">{{ data['reserved_quantity'] }} reserved</span>
+                                                        </div>
                                                     </template>
                                                 </Column>
                                                 <Column header="Need">
