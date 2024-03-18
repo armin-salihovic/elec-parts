@@ -16,4 +16,9 @@ class ProjectBuildPart extends Model
     {
         return $this->belongsTo(Inventory::class);
     }
+
+    public function projectBuild(): BelongsTo
+    {
+        return $this->belongsTo(ProjectBuild::class);
+    }
 }

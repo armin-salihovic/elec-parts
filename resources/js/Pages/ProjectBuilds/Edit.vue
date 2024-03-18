@@ -28,8 +28,6 @@ function onRowCollapse (event) {
 }
 
 function addInventoryPart(inventory, projectPart) {
-    inventory['selected'] = true;
-
     const uri = route('project-build-parts.store', [route().params.project, route().params.project_build]);
 
     const data = {
@@ -41,6 +39,9 @@ function addInventoryPart(inventory, projectPart) {
         .post(uri, data)
         .then(({data}) => {
             projectPart['inventory_quantity'] = data['inventory_quantity'];
+            projectPart['is_loaded'] = data['is_loaded'];
+            inventory['quantity'] = data['available_inv_quantity'];
+            inventory['selected'] = true;
         }).catch(() => {
             loadProjectParts(projectPart);
         });
@@ -57,11 +58,12 @@ function deleteInventoryPart(inventoryId, projectPart) {
     axios.delete(uri).then(({data}) => {
         loadProjectParts(projectPart);
         projectPart['inventory_quantity'] = data['inventory_quantity'];
+        projectPart['is_loaded'] = data['is_loaded'];
     });
 }
 
 function isLoaded(projectPart) {
-    return projectPart['inventory_quantity'] >= projectPart['quantity'] * props.project_build['quantity'];
+    return projectPart['is_loaded'];
 }
 
 function loadProjectParts(projectPart) {
@@ -201,7 +203,7 @@ function handleSelectionOrderChange() {
                                                 </template>
                                                 <Column headerStyle="width:2rem">
                                                     <template #body="{data}">
-                                                        <Button v-if="data['selected']" @click="deleteInventoryPart(data['id'], slotProps.data)">Remove</Button>
+                                                        <Button v-if="data['selected']" @click="deleteInventoryPart(data['id'], slotProps.data)" color="orange">Remove</Button>
                                                         <Button v-else @click="addInventoryPart(data, slotProps.data)">Select</Button>
                                                     </template>
                                                 </Column>
@@ -211,7 +213,14 @@ function handleSelectionOrderChange() {
                                                     </template>
                                                 </Column>
                                                 <Column field="sku" header="SKU" />
-                                                <Column field="quantity" header="Quantity" />
+                                                <Column header="Quantity">
+                                                    <template #body="{data}">
+                                                        <div>
+                                                            <span>{{ data['quantity'] }} available</span><br>
+                                                            <span v-if="data['reserved_quantity'] > 0" class="text-blue-700 underline cursor-pointer">{{ data['reserved_quantity'] }} reserved</span>
+                                                        </div>
+                                                    </template>
+                                                </Column>
                                                 <Column header="Need">
                                                     <template #body="{data}">
                                                         <div v-if="!isLoaded(slotProps.data) && !data['selected']">

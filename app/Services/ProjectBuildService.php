@@ -4,10 +4,23 @@ namespace App\Services;
 
 use App\Enums\PriorityType;
 use App\Models\ProjectBuild;
+use App\Models\ProjectBuildPart;
 use App\Models\ProjectPart;
+use App\Repositories\InventoryRepository;
+use Illuminate\Database\Eloquent\Collection;
 
 class ProjectBuildService
 {
+    private InventoryRepository $inventoryRepository;
+
+    /**
+     * @param InventoryRepository $inventoryRepository
+     */
+    public function __construct(InventoryRepository $inventoryRepository)
+    {
+        $this->inventoryRepository = $inventoryRepository;
+    }
+
     public function buildProject(ProjectBuild $projectBuild): void
     {
         foreach ($projectBuild->project->projectParts as $projectPart) {
@@ -27,7 +40,6 @@ class ProjectBuildService
 
         foreach ($projectBuildParts as $projectBuildPart) {
             $projectBuildPart->inventory->quantity += $projectBuildPart->quantity;
-            $projectBuildPart->quantity = 0;
             $projectBuildPart->used = false;
 
             $projectBuildPart->inventory->save();
@@ -41,30 +53,27 @@ class ProjectBuildService
     {
         $need = $projectPart->quantity * $projectBuild->quantity;
 
+        /** @var ProjectBuildPart $projectBuildPart */
         foreach ($projectBuildParts as $projectBuildPart) {
 
-            $inventoryPart = $projectBuildPart->inventory;
+            $inventory = $projectBuildPart->inventory;
 
-            if ($inventoryPart->quantity >= $need) {
-                $inventoryPart->quantity -= $need;
-                $projectBuildPart->quantity = $need;
-                $need = 0;
-            } else {
-                $projectBuildPart->quantity = $inventoryPart->quantity;
-                $need -= $inventoryPart->quantity;
-                $inventoryPart->quantity = 0;
-            }
+            $inventory->quantity -= $projectBuildPart->quantity;
+            $need -= $projectBuildPart->quantity;
+
             $projectBuildPart->used = true;
 
-            $inventoryPart->save();
+            $inventory->save();
             $projectBuildPart->save();
+
+//            dd($projectBuildPart->inventory->quantity);
 
             if ($need === 0) break;
         }
     }
 
     // todo: refactor $this->updateInventories(...
-    public function getProjectBuildPartsDraft(ProjectBuild $projectBuild, ProjectPart $projectPart)
+    public function getProjectBuildPartsDraft(ProjectBuild $projectBuild, ProjectPart $projectPart): Collection
     {
         $projectBuildParts = $projectBuild->parts->where('project_part_id', $projectPart->id);
 
@@ -74,20 +83,20 @@ class ProjectBuildService
 
         foreach ($projectBuildParts as $projectBuildPart) {
 
-            $inventoryPart = $projectBuildPart->inventory;
+            $inventory = $projectBuildPart->inventory;
 
-            if ($inventoryPart->quantity >= $need) {
-                $inventoryPart->quantity -= $need;
+            if ($inventory->quantity >= $need) {
+                $inventory->quantity -= $need;
                 $projectBuildPart->quantity = $need;
                 $need = 0;
             } else {
-                $projectBuildPart->quantity = $inventoryPart->quantity;
-                $need -= $inventoryPart->quantity;
-                $inventoryPart->quantity = 0;
+                $projectBuildPart->quantity = $inventory->quantity;
+                $need -= $inventory->quantity;
+                $inventory->quantity = 0;
             }
             $projectBuildPart->used = true;
 
-//            $inventoryPart->save();
+//            $inventory->save();
 //            $projectBuildPart->save();
 
             if ($need === 0) break;
@@ -97,7 +106,7 @@ class ProjectBuildService
     }
 
 
-    public function sortProjectBuildPartsByPriority(ProjectBuild $projectBuild, $projectBuildParts)
+    public function sortProjectBuildPartsByPriority(ProjectBuild $projectBuild, Collection $projectBuildParts): Collection
     {
         switch ($projectBuild->selection_priority) {
             case PriorityType::FIFO:
